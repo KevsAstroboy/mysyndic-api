@@ -1,0 +1,111 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RbacGuard } from '../common/guards/rbac.guard';
+import { RequireFeature } from '../common/decorators/feature.decorator';
+import { {{modelName}}Service } from './{{kebabName}}.service';
+import { Create{{modelName}}Dto } from './dto/create-{{kebabName}}.dto';
+import { Update{{modelName}}Dto } from './dto/update-{{kebabName}}.dto';
+
+@ApiTags('{{modelName}}')
+@Controller('{{routeName}}')
+@UseGuards(JwtAuthGuard, RbacGuard)
+@ApiBearerAuth()
+export class {{modelName}}Controller {
+  constructor(private readonly {{camelName}}Service: {{modelName}}Service) {}
+{{#if hasCiteId}}
+  @Get()
+  @ApiOperation({ summary: 'Lister les {{labelPlural}}' })
+  @ApiResponse({ status: 200, description: 'Liste des {{labelPlural}}' })
+  findAll(@Request() req: any) {
+    return this.{{camelName}}Service.findAll(req.user.cite_id);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Détail {{label}}' })
+  @ApiResponse({ status: 200, description: 'Détail' })
+  @ApiResponse({ status: 404, description: '{{label}} introuvable' })
+  findOne(@Param('id') id: {{idType}}, @Request() req: any) {
+    return this.{{camelName}}Service.findOne(id, req.user.cite_id);
+  }
+
+  @Post()
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Créer un {{label}}' })
+  @ApiResponse({ status: 201, description: '{{label}} créé' })
+  create(@Body() dto: Create{{modelName}}Dto, @Request() req: any) {
+    return this.{{camelName}}Service.create(req.user.cite_id, dto);
+  }
+
+  @Patch(':id')
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Modifier un {{label}}' })
+  @ApiResponse({ status: 200, description: '{{label}} modifié' })
+  update(@Param('id') id: {{idType}}, @Body() dto: Update{{modelName}}Dto, @Request() req: any) {
+    return this.{{camelName}}Service.update(id, req.user.cite_id, dto);
+  }
+
+  @Delete(':id')
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Supprimer un {{label}}' })
+  @ApiResponse({ status: 200, description: '{{label}} supprimé' })
+  remove(@Param('id') id: {{idType}}, @Request() req: any) {
+    return this.{{camelName}}Service.remove(id, req.user.cite_id);
+  }
+{{/if}}
+{{#if hasNoCiteId}}
+  @Get()
+  @ApiOperation({ summary: 'Lister les {{labelPlural}}' })
+  @ApiResponse({ status: 200, description: 'Liste des {{labelPlural}}' })
+  findAll() {
+    return this.{{camelName}}Service.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Détail {{label}}' })
+  @ApiResponse({ status: 200, description: 'Détail' })
+  @ApiResponse({ status: 404, description: '{{label}} introuvable' })
+  findOne(@Param('id') id: {{idType}}) {
+    return this.{{camelName}}Service.findOne(id);
+  }
+
+  @Post()
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Créer un {{label}}' })
+  @ApiResponse({ status: 201, description: '{{label}} créé' })
+  create(@Body() dto: Create{{modelName}}Dto) {
+    return this.{{camelName}}Service.create(dto);
+  }
+
+  @Patch(':id')
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Modifier un {{label}}' })
+  @ApiResponse({ status: 200, description: '{{label}} modifié' })
+  update(@Param('id') id: {{idType}}, @Body() dto: Update{{modelName}}Dto) {
+    return this.{{camelName}}Service.update(id, dto);
+  }
+
+  @Delete(':id')
+  @RequireFeature('{{featureCode}}')
+  @ApiOperation({ summary: 'Supprimer un {{label}}' })
+  @ApiResponse({ status: 200, description: '{{label}} supprimé' })
+  remove(@Param('id') id: {{idType}}) {
+    return this.{{camelName}}Service.remove(id);
+  }
+{{/if}}
+}

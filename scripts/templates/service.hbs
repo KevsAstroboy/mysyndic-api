@@ -1,0 +1,110 @@
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Create{{modelName}}Dto } from './dto/create-{{kebabName}}.dto';
+import { Update{{modelName}}Dto } from './dto/update-{{kebabName}}.dto';
+
+@Injectable()
+export class {{modelName}}Service {
+  private readonly logger = new Logger({{modelName}}Service.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+{{#if hasCiteId}}
+  async findAll(citeId: string) {
+    return this.prisma.{{prismaName}}.findMany({
+      where: { cite_id: citeId{{#if hasIsDeleted}}, is_deleted: false{{/if}} },
+      orderBy: { {{orderByField}}: 'desc' as const },
+    });
+  }
+
+  async findOne(id: {{idType}}, citeId: string) {
+    const entity = await this.prisma.{{prismaName}}.findFirst({
+      where: { id, cite_id: citeId{{#if hasIsDeleted}}, is_deleted: false{{/if}} },
+    });
+    if (!entity) throw new NotFoundException('{{label}} introuvable');
+    return entity;
+  }
+
+  async create(citeId: string, dto: Create{{modelName}}Dto) {
+    return this.prisma.{{prismaName}}.create({
+      data: {
+        ...(dto as any),
+        cite_id: citeId,
+{{#if hasCreatedAt}}
+        created_at: new Date(),
+{{/if}}
+      },
+    });
+  }
+
+  async update(id: {{idType}}, citeId: string, dto: Update{{modelName}}Dto) {
+    await this.findOne(id, citeId);
+    return this.prisma.{{prismaName}}.update({
+      where: { id },
+      data: { ...(dto as any){{#if hasUpdatedAt}}, updated_at: new Date(){{/if}} },
+    });
+  }
+
+  async remove(id: {{idType}}, citeId: string) {
+    await this.findOne(id, citeId);
+    {{#if hasIsDeleted}}
+    return this.prisma.{{prismaName}}.update({
+      where: { id },
+      data: { is_deleted: true{{#if hasDeletedAt}}, deleted_at: new Date(){{/if}} },
+    });
+    {{/if}}
+    {{#if hasNoIsDeleted}}
+    return this.prisma.{{prismaName}}.delete({ where: { id } });
+    {{/if}}
+  }
+{{/if}}
+{{#if hasNoCiteId}}
+  async findAll() {
+    return this.prisma.{{prismaName}}.findMany({
+      {{#if hasIsDeleted}}
+      where: { is_deleted: false },
+      {{/if}}
+      orderBy: { {{orderByField}}: 'desc' as const },
+    });
+  }
+
+  async findOne(id: {{idType}}) {
+    const entity = await this.prisma.{{prismaName}}.findFirst({
+      where: { id{{#if hasIsDeleted}}, is_deleted: false{{/if}} },
+    });
+    if (!entity) throw new NotFoundException('{{label}} introuvable');
+    return entity;
+  }
+
+  async create(dto: Create{{modelName}}Dto) {
+    return this.prisma.{{prismaName}}.create({
+      data: {
+        ...(dto as any),
+{{#if hasCreatedAt}}
+        created_at: new Date(),
+{{/if}}
+      },
+    });
+  }
+
+  async update(id: {{idType}}, dto: Update{{modelName}}Dto) {
+    await this.findOne(id);
+    return this.prisma.{{prismaName}}.update({
+      where: { id },
+      data: { ...(dto as any){{#if hasUpdatedAt}}, updated_at: new Date(){{/if}} },
+    });
+  }
+
+  async remove(id: {{idType}}) {
+    await this.findOne(id);
+    {{#if hasIsDeleted}}
+    return this.prisma.{{prismaName}}.update({
+      where: { id },
+      data: { is_deleted: true{{#if hasDeletedAt}}, deleted_at: new Date(){{/if}} },
+    });
+    {{/if}}
+    {{#if hasNoIsDeleted}}
+    return this.prisma.{{prismaName}}.delete({ where: { id } });
+    {{/if}}
+  }
+{{/if}}
+}

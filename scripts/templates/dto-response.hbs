@@ -1,0 +1,17 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class {{modelName}}ResponseDto {
+  @ApiProperty({ example: '00000000-0000-0000-0000-000000000001' })
+  id: {{idType}};
+
+{{#each scalars}}
+{{#if isOptional}}
+  @ApiPropertyOptional({ example: {{example}} })
+  {{name}}?: {{tsType}};
+{{/if}}
+{{#if isRequired}}
+  @ApiProperty({ example: {{example}} })
+  {{name}}: {{tsType}};
+{{/if}}
+{{/each}}
+}

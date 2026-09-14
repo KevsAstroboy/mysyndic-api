@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySyndic — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root {
+  --bg:           #F5F7F4;
+  --surface:      #FFFFFF;
+  --surface-2:    #F0F3F0;
+  --ink:          #0F1E2D;
+  --ink-2:        #3A5068;
+  --ink-3:        #8BA4B8;
+  --border:       #E2EAE7;
+
+  --primary:      #0D6E5A;
+  --primary-light:#E6F5F1;
+  --primary-mid:  #0A5A49;
+  --primary-dark: #083D31;
+
+  --gold:         #E8A020;
+  --gold-soft:    #FEF3DC;
+  --emerald:      #00A87C;
+  --emerald-soft: #DDFAF0;
+  --red:          #E8453C;
+  --red-soft:     #FDECEA;
+  --red-glow:     rgba(232,69,60,.38);
+
+  --shadow-card:  0 1px 4px rgba(13,110,90,.06), 0 4px 16px rgba(13,110,90,.07);
+  --shadow-float: 0 8px 32px rgba(13,110,90,.14);
+  --shadow-fab:   0 6px 24px rgba(232,69,60,.42);
+
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  20px;
+  --r-xl:  24px;
+  --r-pill:999px;
+
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: #E8EDE8; color: var(--ink); }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { display: block; max-width: 100%; }
+
+/* ─── PAGE LAYOUT — VIEWER ─── */
+.viewer {
+  min-height: 100vh;
+  padding: 40px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+.viewer-section {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.viewer-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: #6a8a7a;
+  text-transform: uppercase;
+}
+
+.viewer-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a2e24;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+.viewer-sub {
+  font-size: 14px;
+  color: #6a8a7a;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* Token grid */
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.token-swatch {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.token-color {
+  height: 56px;
+}
+.token-info {
+  padding: 8px 10px;
+}
+.token-name { font-size: 11px; font-weight: 700; color: var(--ink); }
+.token-hex  { font-size: 10px; color: var(--ink-3); font-weight: 500; }
+
+/* ─── DEVICE FRAMES ─── */
+.devices-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Phone frame */
+.phone-frame {
+  width: 390px;
+  border-radius: 52px;
+  background: #1a1a1a;
+  padding: 14px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.phone-screen {
+  border-radius: 40px;
+  overflow: hidden;
+  height: 844px;
+  position: relative;
+  background: var(--bg);
+}
+.phone-notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 126px; height: 34px;
+  background: #1a1a1a;
+  border-radius: 0 0 20px 20px;
+  z-index: 20;
+}
+
+/* Tablet frame */
+.tablet-frame {
+  width: 768px;
+  border-radius: 28px;
+  background: #1a1a1a;
+  padding: 12px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+.tablet-screen {
+  border-radius: 18px;
+  overflow: hidden;
+  height: 620px;
+  background: var(--bg);
+  position: relative;
+}
+
+/* Desktop frame */
+.desktop-frame {
+  width: 100%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border-radius: 16px 16px 0 0;
+  padding: 36px 12px 0;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
+}
+.desktop-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 10px;
+}
+.desktop-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.desktop-screen {
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  height: 680px;
+  background: var(--bg);
+  position: relative;
+}
+
+/* ─── APP CONTENT — MOBILE ─── */
+.app { height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+
+/* Status bar (iOS) */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px 8px;
+  position: relative;
+  z-index: 10;
+}
+.status-time { font-size: 15px; font-weight: 700; color: var(--ink); }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons svg { color: var(--ink); }
+
+/* Top bar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px 12px;
+  background: var(--bg);
+}
+.topbar-greeting { }
+.greeting-sub { font-size: 12px; font-weight: 600; color: var(--primary); letter-spacing: .02em; }
+.greeting-name { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; margin-top: 1px; }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+.icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+.notif-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 1.5px solid var(--bg);
+}
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+  box-shadow: 0 2px 8px rgba(13,110,90,.25);
+}
+
+/* Scroll content */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0 100px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* ─── HERO PAYMENT CARD ─── */
+.hero-card {
+  margin: 4px 16px 0;
+  border-radius: var(--r-xl);
+  background: linear-gradient(145deg, #0D6E5A 0%, #083D31 60%, #052820 100%);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(13,110,90,.30);
+}
+
+/* Subtle geometric pattern — Kente-inspired */
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px);
+  pointer-events: none;
+}
+.hero-card::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+.hero-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.55); letter-spacing: .08em; }
+.hero-month { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.80); margin-top: 2px; }
+
+.status-pill {
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.status-pill.paid { background: rgba(0,168,124,.25); color: #5DFFC8; }
+.status-pill.pending { background: rgba(232,160,32,.22); color: #FFD166; }
+.status-pill.overdue { background: rgba(232,69,60,.22); color: #FF8080; }
+
+.hero-amount {
+  font-size: 38px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -1px;
+  line-height: 1;
+  position: relative; z-index: 1;
+  margin-bottom: 4px;
+}
+.hero-amount-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+
+/* Month bars */
+.month-bars {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 32px;
+  position: relative; z-index: 1;
+  margin-bottom: 16px;
+}
+.month-bar {
+  flex: 1;
+  border-radius: 3px;
+  position: relative;
+}
+.month-bar.paid-bar    { background: #00D9A0; height: 100%; }
+.month-bar.current-bar { background: #FFD166; height: 100%; }
+.month-bar.future-bar  { background: rgba(255,255,255,.15); height: 60%; }
+.month-bar.overdue-bar { background: #FF7B6E; height: 100%; }
+
+.month-labels {
+  display: flex;
+  gap: 4px;
+  position: relative; z-index: 1;
+}
+.month-label {
+  flex: 1;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255,255,255,.4);
+}
+.month-label.active { color: rgba(255,255,255,.75); }
+
+.hero-cta {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,.13);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px);
+  position: relative; z-index: 1;
+  letter-spacing: -.1px;
+}
+
+/* ─── QUICK ACTIONS ─── */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 10px;
+}
+.section-title { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.section-link  { font-size: 13px; font-weight: 600; color: var(--primary); }
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 16px;
+}
+.quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.quick-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.quick-icon.green  { background: var(--emerald-soft); color: var(--emerald); }
+.quick-icon.teal   { background: var(--primary-light); color: var(--primary); }
+.quick-icon.gold   { background: var(--gold-soft); color: var(--gold); }
+.quick-icon.red    { background: var(--red-soft); color: var(--red); }
+.quick-label { font-size: 10px; font-weight: 700; color: var(--ink-2); text-align: center; line-height: 1.2; }
+
+/* ─── ANNOUNCEMENTS ─── */
+.announce-scroll {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.announce-scroll::-webkit-scrollbar { display: none; }
+.announce-card {
+  flex-shrink: 0;
+  width: 240px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.announce-tag {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: .02em;
+}
+.announce-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+.announce-meta {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* ─── INCIDENTS LIST ─── */
+.incidents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+.incident-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.incident-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.incident-icon.elec  { background: var(--gold-soft); color: var(--gold); }
+.incident-icon.water { background: #EAF4FD; color: #2196F3; }
+.incident-icon.clean { background: var(--emerald-soft); color: var(--emerald); }
+.incident-body { flex: 1; min-width: 0; }
+.incident-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.incident-meta  { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+.incident-likes { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-3); }
+
+/* ─── BOTTOM NAVIGATION ─── */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 82px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(0,0,0,.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px 16px;
+  z-index: 100;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  transition: background .15s;
+}
+.nav-item.active { background: var(--primary-light); }
+.nav-item.active svg { color: var(--primary); }
+.nav-item.active .nav-label { color: var(--primary); }
+.nav-icon { width: 22px; height: 22px; color: var(--ink-3); }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+
+/* FAB urgence */
+.fab {
+  position: absolute;
+  bottom: 90px;
+  right: 20px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: var(--shadow-fab);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.fab::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  opacity: .4;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: .4; }
+  50% { transform: scale(1.15); opacity: .15; }
+}
+
+/* ─── BOTTOM SHEET ─── */
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13,27,54,.55);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+}
+.sheet {
+  width: 100%;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 12px 20px 40px;
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  margin: 0 auto 20px;
+}
+.sheet-title { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 4px; letter-spacing: -.3px; }
+.sheet-sub   { font-size: 13px; color: var(--ink-3); font-weight: 500; margin-bottom: 20px; }
+
+.alert-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.alert-option {
+  padding: 14px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.alert-option.selected {
+  border-color: var(--red);
+  background: var(--red-soft);
+}
+.alert-option-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--red-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--red);
+}
+.alert-option-label { font-size: 11px; font-weight: 700; color: var(--ink); text-align: center; line-height: 1.3; }
+
+.sheet-textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  resize: none;
+  height: 80px;
+  margin-bottom: 14px;
+  outline: none;
+}
+.sheet-textarea::placeholder { color: var(--ink-3); }
+
+.sheet-btn-primary {
+  width: 100%;
+  padding: 15px;
+  border-radius: var(--r-md);
+  background: var(--red);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.1px;
+  box-shadow: 0 4px 16px var(--red-glow);
+}
+.sheet-btn-ghost {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* ─── COTISATION SCREEN ─── */
+.screen-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 20px 12px;
+}
+.back-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+  color: var(--ink);
+}
+.screen-title { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+
+.cotisation-hero {
+  margin: 8px 16px 0;
+  border-radius: var(--r-xl);
+  background: linear-gradient(145deg, #0D6E5A, #052820);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.cotisation-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(60deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 18px),
+    repeating-linear-gradient(-60deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 18px);
+}
+.cot-big { font-size: 42px; font-weight: 800; color: #fff; letter-spacing: -1.5px; position: relative; z-index: 1; }
+.cot-sub { font-size: 12px; color: rgba(255,255,255,.5); font-weight: 500; position: relative; z-index: 1; margin-bottom: 20px; }
+.cot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,.1);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.cot-row-label { font-size: 12px; color: rgba(255,255,255,.6); font-weight: 500; }
+.cot-row-value { font-size: 13px; color: #fff; font-weight: 700; }
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.history-left { display: flex; align-items: center; gap: 12px; }
+.history-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.history-icon.paid   { background: var(--emerald-soft); color: var(--emerald); }
+.history-icon.late   { background: var(--red-soft); color: var(--red); }
+.history-icon.pending{ background: var(--gold-soft); color: var(--gold); }
+.history-month { font-size: 14px; font-weight: 700; color: var(--ink); }
+.history-channel { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+.history-right { text-align: right; }
+.history-amount { font-size: 15px; font-weight: 800; color: var(--ink); }
+.history-status {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+.history-status.paid    { color: var(--emerald); background: var(--emerald-soft); }
+.history-status.pending { color: var(--gold); background: var(--gold-soft); }
+.history-status.late    { color: var(--red); background: var(--red-soft); }
+
+/* ─── TABLET LAYOUT ─── */
+.tablet-app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  background: var(--bg);
+}
+
+.sidebar-nav {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  gap: 4px;
+}
+.sidebar-logo {
+  width: 40px; height: 40px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(13,110,90,.25);
+}
+.sidebar-item {
+  width: 48px; height: 48px;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-3);
+  position: relative;
+}
+.sidebar-item.active {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.sidebar-item .notif-dot {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 1.5px solid var(--surface);
+}
+
+.tablet-content {
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.tablet-content::-webkit-scrollbar { width: 0; }
+
+.tablet-toprow {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+.stat-label { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 6px; letter-spacing: .03em; }
+.stat-value { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; }
+.stat-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.stat-delta.up   { color: var(--emerald); }
+.stat-delta.down { color: var(--red); }
+
+.tablet-hero-card {
+  background: linear-gradient(145deg, #0D6E5A, #052820);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-float);
+  position: relative;
+  overflow: hidden;
+}
+.tablet-hero-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px);
+}
+.tablet-hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; position: relative; z-index: 1; }
+.tablet-hero-label { font-size: 11px; color: rgba(255,255,255,.55); font-weight: 600; letter-spacing: .06em; }
+.tablet-hero-amount { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 4px; position: relative; z-index: 1; }
+.tablet-hero-sub { font-size: 11px; color: rgba(255,255,255,.5); position: relative; z-index: 1; margin-bottom: 16px; }
+
+/* Mini bars for tablet */
+.mini-bars {
+  display: flex; gap: 3px; align-items: flex-end; height: 24px;
+  position: relative; z-index: 1;
+}
+.mini-bar { flex: 1; border-radius: 2px; }
+
+.recents-panel {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.panel-title { font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 14px; letter-spacing: -.2px; }
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.activity-dot.green { background: var(--emerald); }
+.activity-dot.gold  { background: var(--gold); }
+.activity-dot.red   { background: var(--red); }
+.activity-text { font-size: 12px; font-weight: 600; color: var(--ink-2); flex: 1; }
+.activity-time { font-size: 11px; color: var(--ink-3); font-weight: 500; white-space: nowrap; }
+
+.bottom-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── DESKTOP LAYOUT ─── */
+.desktop-app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  background: var(--bg);
+}
+
+.desktop-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 2px;
+  overflow-y: auto;
+}
+.desktop-sidebar::-webkit-scrollbar { width: 0; }
+
+.desktop-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 24px;
+}
+.desktop-logo-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+  box-shadow: 0 3px 10px rgba(13,110,90,.25);
+  flex-shrink: 0;
+}
+.desktop-logo-text { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.desktop-logo-cite { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+
+.sidebar-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: .1em;
+  padding: 12px 10px 4px;
+  text-transform: uppercase;
+}
+.desktop-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.desktop-nav-item.active {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.desktop-nav-item svg { flex-shrink: 0; }
+.desktop-nav-item .nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  min-width: 18px;
+  text-align: center;
+}
+
+.desktop-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.desktop-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--r-sm);
+}
+.desktop-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.desktop-user-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+.desktop-user-role { font-size: 10px; font-weight: 500; color: var(--ink-3); }
+
+.desktop-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.desktop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.desktop-page-title { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; }
+.desktop-page-sub { font-size: 12px; color: var(--ink-3); font-weight: 500; margin-top: 2px; }
+.desktop-header-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--r-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(13,110,90,.25);
+}
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+
+.desktop-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.desktop-body::-webkit-scrollbar { width: 0; }
+
+.desktop-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.kpi-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.kpi-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon.teal   { background: var(--primary-light); color: var(--primary); }
+.kpi-icon.green  { background: var(--emerald-soft); color: var(--emerald); }
+.kpi-icon.gold   { background: var(--gold-soft); color: var(--gold); }
+.kpi-icon.red    { background: var(--red-soft); color: var(--red); }
+.kpi-info {}
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 4px; }
+.kpi-value { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; line-height: 1; }
+.kpi-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.kpi-delta.up   { color: var(--emerald); }
+.kpi-delta.mid  { color: var(--gold); }
+.kpi-delta.down { color: var(--red); }
+
+.desktop-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+
+.data-table-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.data-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table-title { font-size: 14px; font-weight: 800; color: var(--ink); }
+.data-filter {
+  display: flex;
+  gap: 6px;
+}
+.filter-pill {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  border: 1px solid var(--border);
+}
+.filter-pill.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary-light); }
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 90px 80px;
+  align-items: center;
+  padding: 11px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.table-row:last-child { border-bottom: none; }
+.table-header-row { background: var(--surface-2); font-weight: 700; color: var(--ink-3); font-size: 10px; letter-spacing: .05em; }
+.table-row-name { display: flex; align-items: center; gap: 10px; }
+.table-mini-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: var(--primary);
+}
+.table-name { font-weight: 700; color: var(--ink); font-size: 12px; }
+.table-villa { font-size: 10px; color: var(--ink-3); font-weight: 500; }
+.table-amount { font-weight: 700; color: var(--ink); }
+.table-status {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.table-status.paid    { background: var(--emerald-soft); color: var(--emerald); }
+.table-status.pending { background: var(--gold-soft); color: var(--gold); }
+.table-status.late    { background: var(--red-soft); color: var(--red); }
+.table-action { color: var(--ink-3); cursor: pointer; }
+
+.alert-panel {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.alert-item-d {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.alert-item-d:last-child { border-bottom: none; }
+.alert-severity {
+  width: 8px; flex-shrink: 0;
+  align-self: stretch;
+  border-radius: var(--r-pill);
+  margin-top: 2px;
+}
+.alert-severity.high   { background: var(--red); }
+.alert-severity.medium { background: var(--gold); }
+.alert-severity.low    { background: var(--emerald); }
+.alert-d-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.alert-d-body { flex: 1; }
+.alert-d-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.alert-d-sub { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+.alert-d-time { font-size: 10px; color: var(--ink-3); white-space: nowrap; font-weight: 500; }
+.alert-tag {
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+}
+.alert-tag.active    { background: var(--red-soft); color: var(--red); }
+.alert-tag.on-route  { background: var(--gold-soft); color: var(--gold); }
+.alert-tag.resolved  { background: var(--emerald-soft); color: var(--emerald); }
+
+/* ─── DESIGN SYSTEM DISPLAY ─── */
+.type-sample {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.t-display { font-size: 36px; font-weight: 800; color: var(--ink); letter-spacing: -1px; }
+.t-h1      { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; }
+.t-h2      { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.t-body    { font-size: 14px; font-weight: 400; color: var(--ink-2); line-height: 1.55; }
+.t-small   { font-size: 12px; font-weight: 500; color: var(--ink-3); }
+.t-label   { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: .04em; }
+
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.comp-item {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.comp-label { font-size: 10px; font-weight: 700; color: var(--ink-3); letter-spacing: .05em; text-transform: uppercase; }
+
+/* Buttons showcase */
+.btn-showcase { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn-p { padding: 10px 18px; border-radius: var(--r-sm); background: var(--primary); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px rgba(13,110,90,.25); }
+.btn-s { padding: 10px 18px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink-2); font-size: 13px; font-weight: 600; border: 1px solid var(--border); }
+.btn-d { padding: 10px 18px; border-radius: var(--r-sm); background: var(--red); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px var(--red-glow); }
+
+/* Input showcase */
+.input-demo {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+/* ─── PROGRESS BAR ─── */
+.progress-bar {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--emerald), var(--primary));
+}
+
+/* ─── CHIP ─── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+.chip.teal   { background: var(--primary-light); color: var(--primary); }
+.chip.green  { background: var(--emerald-soft); color: var(--emerald); }
+.chip.gold   { background: var(--gold-soft); color: var(--gold); }
+.chip.red    { background: var(--red-soft); color: var(--red); }
+
+/* ─── INTRO SECTION ─── */
+.intro-card {
+  background: linear-gradient(145deg, #0D6E5A 0%, #052820 100%);
+  border-radius: var(--r-xl);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.intro-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 14px);
+}
+.intro-eyebrow { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.5); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; position: relative; z-index: 1; }
+.intro-name { font-size: 40px; font-weight: 800; color: #fff; letter-spacing: -1.5px; position: relative; z-index: 1; margin-bottom: 6px; }
+.intro-tagline { font-size: 16px; color: rgba(255,255,255,.65); font-weight: 500; position: relative; z-index: 1; margin-bottom: 28px; max-width: 500px; line-height: 1.5; }
+.intro-tokens {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative; z-index: 1;
+}
+.intro-token {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.8);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,.15);
+}
+
+/* SVG icon helpers */
+svg { display: block; }
+
+/* ─── RESPONSIVE VIEWER OVERRIDES ─── */
+@media (max-width: 900px) {
+  .tablet-frame { width: 100%; max-width: 600px; }
+  .phone-frame { width: 340px; }
+  .phone-screen { height: 720px; }
+}
+@media (max-width: 600px) {
+  .viewer { padding: 24px 12px 40px; gap: 40px; }
+  .phone-frame { width: 100%; max-width: 360px; }
+  .desktop-frame { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="viewer">
+
+  <!-- ─── INTRO ─── -->
+  <div class="viewer-section">
+    <div class="intro-card">
+      <div class="intro-eyebrow">Design System — MVP</div>
+      <div class="intro-name">MySyndic</div>
+      <div class="intro-tagline">Gestion de cité résidentielle pour le marché ivoirien. Design iOS-first, responsive, chaleureux et fiable.</div>
+      <div class="intro-tokens">
+        <span class="intro-token">Plus Jakarta Sans</span>
+        <span class="intro-token">Teal #0D6E5A</span>
+        <span class="intro-token">iOS-style components</span>
+        <span class="intro-token">Mobile-first</span>
+        <span class="intro-token">Kente motif hero cards</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PALETTE ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Design Tokens</div>
+    <div class="viewer-title">Palette & Couleurs</div>
+    <div class="viewer-sub">Teal tropical comme couleur de confiance — inspiré du fintech africain (Paystack, Flutterwave). Ambre et émeraude pour les états.</div>
+    <div class="token-grid">
+      <div class="token-swatch"><div class="token-color" style="background:#0D6E5A"></div><div class="token-info"><div class="token-name">Primary</div><div class="token-hex">#0D6E5A</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#052820"></div><div class="token-info"><div class="token-name">Primary Dark</div><div class="token-hex">#052820</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#E6F5F1"></div><div class="token-info"><div class="token-name">Primary Light</div><div class="token-hex">#E6F5F1</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#00A87C"></div><div class="token-info"><div class="token-name">Emerald</div><div class="token-hex">#00A87C</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#E8A020"></div><div class="token-info"><div class="token-name">Gold</div><div class="token-hex">#E8A020</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#E8453C"></div><div class="token-info"><div class="token-name">Red / Urgence</div><div class="token-hex">#E8453C</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#F5F7F4"></div><div class="token-info" style="border-top:1px solid #eee"><div class="token-name">Background</div><div class="token-hex">#F5F7F4</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#FFFFFF; border-top:1px solid #eee"></div><div class="token-info"><div class="token-name">Surface</div><div class="token-hex">#FFFFFF</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#0F1E2D"></div><div class="token-info"><div class="token-name">Ink</div><div class="token-hex">#0F1E2D</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#3A5068"></div><div class="token-info"><div class="token-name">Ink-2</div><div class="token-hex">#3A5068</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#8BA4B8"></div><div class="token-info"><div class="token-name">Ink-3</div><div class="token-hex">#8BA4B8</div></div></div>
+      <div class="token-swatch"><div class="token-color" style="background:#E2EAE7"></div><div class="token-info"><div class="token-name">Border</div><div class="token-hex">#E2EAE7</div></div></div>
+    </div>
+  </div>
+
+  <!-- ─── TYPOGRAPHY ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Typographie</div>
+    <div class="viewer-title">Plus Jakarta Sans</div>
+    <div class="viewer-sub">SF Pro sur iOS. Plus Jakarta Sans comme web fallback — premium, légèrement géométrique, adopté par le fintech africain.</div>
+    <div class="type-sample">
+      <div class="t-display">Synacassy 1</div>
+      <div class="t-h1">Tableau de bord</div>
+      <div class="t-h2">Cotisation du mois</div>
+      <div class="t-body">Votre cotisation mensuelle a été confirmée. Le reçu est disponible en téléchargement dans votre espace profil.</div>
+      <div class="t-small">Payé via Paystack · 28 août 2026</div>
+      <div class="t-label">Villa 14 · Rue des Palmiers</div>
+    </div>
+  </div>
+
+  <!-- ─── COMPOSANTS ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Composants</div>
+    <div class="viewer-title">Système de composants</div>
+    <div class="component-grid">
+      <div class="comp-item">
+        <div class="comp-label">Boutons</div>
+        <div class="btn-showcase">
+          <button class="btn-p">Payer</button>
+          <button class="btn-s">Annuler</button>
+          <button class="btn-d">Urgence</button>
+        </div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-label">Statuts</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="chip green">Payé</span>
+          <span class="chip gold">En attente</span>
+          <span class="chip red">Impayé</span>
+          <span class="chip teal">En cours</span>
+        </div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-label">Champ texte</div>
+        <input class="input-demo" placeholder="Villa 14" readonly>
+      </div>
+      <div class="comp-item">
+        <div class="comp-label">Progression</div>
+        <div style="width:100%">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span class="t-label">Recouvrement</span>
+            <span class="t-label" style="color:var(--primary)">74%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:74%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MOBILE ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Vue Mobile</div>
+    <div class="viewer-title">Espace Habitant — Accueil</div>
+    <div class="viewer-sub">iPhone 14 Pro · 390×844px · Bottom navigation fixe · FAB urgence</div>
+    <div class="devices-row">
+
+      <!-- Phone 1: Accueil -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar">
+              <span class="status-time">9:41</span>
+              <div class="status-icons">
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="currentColor" opacity=".3"/></svg>
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 2.5C10.2 2.5 12.2 3.5 13.5 5L15 3.5C13.3 1.8 10.8.7 8 .7s-5.3 1.1-7 2.8L2.5 5C3.8 3.5 5.8 2.5 8 2.5z" fill="currentColor"/><path d="M8 5.5c1.4 0 2.7.6 3.6 1.5L13 5.5C11.7 4.2 9.9 3.3 8 3.3s-3.7.9-5 2.2L4.4 7c.9-.9 2.2-1.5 3.6-1.5z" fill="currentColor"/><circle cx="8" cy="10" r="1.5" fill="currentColor"/></svg>
+                <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+              </div>
+            </div>
+            <div class="topbar">
+              <div class="topbar-greeting">
+                <div class="greeting-sub">Bonjour 👋</div>
+                <div class="greeting-name">Kofi Mensah</div>
+              </div>
+              <div class="topbar-right">
+                <div class="icon-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  <div class="notif-badge"></div>
+                </div>
+                <div class="avatar">KM</div>
+              </div>
+            </div>
+            <div class="scroll-content">
+              <!-- Hero card -->
+              <div class="hero-card">
+                <div class="hero-card-top">
+                  <div>
+                    <div class="hero-label">Cotisation</div>
+                    <div class="hero-month">Septembre 2026</div>
+                  </div>
+                  <div class="status-pill pending">En attente</div>
+                </div>
+                <div class="hero-amount">25 000</div>
+                <div class="hero-amount-label">FCFA · Villa 14, Rue des Palmiers</div>
+                <div class="month-bars">
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar paid-bar"></div>
+                  <div class="month-bar current-bar"></div>
+                  <div class="month-bar future-bar"></div>
+                  <div class="month-bar future-bar"></div>
+                  <div class="month-bar future-bar"></div>
+                </div>
+                <div class="month-labels">
+                  <div class="month-label">J</div><div class="month-label">F</div>
+                  <div class="month-label">M</div><div class="month-label">A</div>
+                  <div class="month-label">M</div><div class="month-label">J</div>
+                  <div class="month-label">J</div><div class="month-label">A</div>
+                  <div class="month-label active">S</div><div class="month-label">O</div>
+                  <div class="month-label">N</div><div class="month-label">D</div>
+                </div>
+                <div class="hero-cta">Payer ma cotisation</div>
+              </div>
+
+              <!-- Quick actions -->
+              <div class="section-header">
+                <div class="section-title">Accès rapide</div>
+              </div>
+              <div class="quick-grid">
+                <div class="quick-item">
+                  <div class="quick-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                  </div>
+                  <div class="quick-label">Cotisation</div>
+                </div>
+                <div class="quick-item">
+                  <div class="quick-icon teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  </div>
+                  <div class="quick-label">Quartier</div>
+                </div>
+                <div class="quick-item">
+                  <div class="quick-icon gold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <div class="quick-label">Messages</div>
+                </div>
+                <div class="quick-item">
+                  <div class="quick-icon red">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  <div class="quick-label">Urgence</div>
+                </div>
+              </div>
+
+              <!-- Annonces -->
+              <div class="section-header">
+                <div class="section-title">Annonces</div>
+                <div class="section-link">Voir tout</div>
+              </div>
+              <div class="announce-scroll">
+                <div class="announce-card">
+                  <div class="announce-tag">Syndic</div>
+                  <div class="announce-title">Réunion des copropriétaires — 12 sept.</div>
+                  <div class="announce-meta">Salle commune · 18h00</div>
+                </div>
+                <div class="announce-card">
+                  <div class="announce-tag" style="background:var(--gold-soft);color:var(--gold)">Maintenance</div>
+                  <div class="announce-title">Coupure d'eau prévue vendredi matin</div>
+                  <div class="announce-meta">De 8h à 12h · Rues A et B</div>
+                </div>
+                <div class="announce-card">
+                  <div class="announce-tag">Syndic</div>
+                  <div class="announce-title">Nouveau code portail principal</div>
+                  <div class="announce-meta">Effectif dès aujourd'hui</div>
+                </div>
+              </div>
+
+              <!-- Incidents récents -->
+              <div class="section-header">
+                <div class="section-title">Incidents récents</div>
+                <div class="section-link">Voir tout</div>
+              </div>
+              <div class="incidents-list">
+                <div class="incident-item">
+                  <div class="incident-icon elec">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div class="incident-body">
+                    <div class="incident-title">Panne éclairage allée B</div>
+                    <div class="incident-meta">Villa 8 · il y a 2h</div>
+                  </div>
+                  <div class="incident-likes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    4
+                  </div>
+                </div>
+                <div class="incident-item">
+                  <div class="incident-icon water">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                  </div>
+                  <div class="incident-body">
+                    <div class="incident-title">Fuite d'eau canalisation</div>
+                    <div class="incident-meta">Rue des Manguiers · hier</div>
+                  </div>
+                  <div class="incident-likes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    7
+                  </div>
+                </div>
+                <div class="incident-item">
+                  <div class="incident-icon clean">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  </div>
+                  <div class="incident-body">
+                    <div class="incident-title">Déchets zone commune non collectés</div>
+                    <div class="incident-meta">Entrée principale · il y a 3j</div>
+                  </div>
+                  <div class="incident-likes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    12
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /scroll -->
+
+            <!-- FAB urgence -->
+            <div class="fab">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+
+            <!-- Bottom nav -->
+            <div class="bottom-nav">
+              <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div class="nav-label">Accueil</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                <div class="nav-label">Cotisation</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="nav-label">Quartier</div>
+              </div>
+              <div class="nav-item" style="position:relative">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="notif-badge" style="position:absolute;top:8px;right:14px"></div>
+                <div class="nav-label">Messages</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="nav-label">Profil</div>
+              </div>
+            </div>
+
+          </div><!-- /app -->
+        </div><!-- /screen -->
+      </div><!-- /phone -->
+
+      <!-- Phone 2: Alert sheet -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar">
+              <span class="status-time">9:41</span>
+              <div class="status-icons">
+                <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+              </div>
+            </div>
+            <!-- Blurred background -->
+            <div style="flex:1;background:var(--bg);position:relative;">
+              <div style="padding:20px 16px;opacity:.3">
+                <div style="height:200px;background:linear-gradient(145deg,#0D6E5A,#052820);border-radius:20px;margin-bottom:16px"></div>
+                <div style="height:60px;background:var(--surface);border-radius:16px;margin-bottom:10px"></div>
+                <div style="height:60px;background:var(--surface);border-radius:16px"></div>
+              </div>
+              <!-- Bottom sheet overlay -->
+              <div class="sheet-overlay">
+                <div class="sheet">
+                  <div class="sheet-handle"></div>
+                  <div class="sheet-title">Signaler une urgence</div>
+                  <div class="sheet-sub">Choisissez le type d'incident</div>
+                  <div class="alert-options">
+                    <div class="alert-option selected">
+                      <div class="alert-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      </div>
+                      <div class="alert-option-label">Intrusion / Agression</div>
+                    </div>
+                    <div class="alert-option">
+                      <div class="alert-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                      </div>
+                      <div class="alert-option-label">Malaise médical</div>
+                    </div>
+                    <div class="alert-option">
+                      <div class="alert-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                      </div>
+                      <div class="alert-option-label">Incendie</div>
+                    </div>
+                    <div class="alert-option">
+                      <div class="alert-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      </div>
+                      <div class="alert-option-label">Autre urgence</div>
+                    </div>
+                  </div>
+                  <textarea class="sheet-textarea" placeholder="Décrivez rapidement la situation…"></textarea>
+                  <button class="sheet-btn-primary">Envoyer l'alerte</button>
+                  <button class="sheet-btn-ghost">Annuler</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 3: Cotisation -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar">
+              <span class="status-time">9:41</span>
+              <div class="status-icons">
+                <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+              </div>
+            </div>
+            <div class="screen-topbar">
+              <div class="back-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </div>
+              <div class="screen-title">Cotisation</div>
+            </div>
+            <div class="scroll-content" style="padding-top:0">
+              <div class="cotisation-hero">
+                <div style="position:relative;z-index:1">
+                  <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.06em;margin-bottom:4px">SOLDE ANNUEL</div>
+                  <div class="cot-big">200 000</div>
+                  <div class="cot-sub">FCFA · 8 mois payés sur 12</div>
+                </div>
+                <div class="cot-row" style="margin-top:16px">
+                  <div class="cot-row-label">Mois en cours</div>
+                  <div class="cot-row-value">Septembre 2026</div>
+                </div>
+              </div>
+
+              <div style="margin:16px 16px 0">
+                <button style="width:100%;padding:15px;border-radius:var(--r-md);background:var(--primary);color:#fff;font-size:15px;font-weight:700;letter-spacing:-.1px;box-shadow:0 4px 16px rgba(13,110,90,.3)">Payer septembre — 25 000 FCFA</button>
+              </div>
+
+              <div class="section-header" style="padding-top:20px">
+                <div class="section-title">Historique</div>
+              </div>
+
+              <div style="background:var(--surface);border-radius:var(--r-md);margin:0 16px;overflow:hidden;box-shadow:var(--shadow-card)">
+                <div class="history-item">
+                  <div class="history-left">
+                    <div class="history-icon paid"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div><div class="history-month">Août 2026</div><div class="history-channel">Paystack · Carte</div></div>
+                  </div>
+                  <div class="history-right">
+                    <div class="history-amount">25 000</div>
+                    <span class="history-status paid">Payé</span>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-left">
+                    <div class="history-icon paid"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div><div class="history-month">Juillet 2026</div><div class="history-channel">Wave manuel</div></div>
+                  </div>
+                  <div class="history-right">
+                    <div class="history-amount">25 000</div>
+                    <span class="history-status paid">Payé</span>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-left">
+                    <div class="history-icon pending"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                    <div><div class="history-month">Juin 2026</div><div class="history-channel">MTN Mobile Money</div></div>
+                  </div>
+                  <div class="history-right">
+                    <div class="history-amount">25 000</div>
+                    <span class="history-status pending">En attente</span>
+                  </div>
+                </div>
+                <div class="history-item" style="border-bottom:none">
+                  <div class="history-left">
+                    <div class="history-icon late"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+                    <div><div class="history-month">Mai 2026</div><div class="history-channel">Cash</div></div>
+                  </div>
+                  <div class="history-right">
+                    <div class="history-amount">25 000</div>
+                    <span class="history-status late">Impayé</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bottom-nav">
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div class="nav-label">Accueil</div>
+              </div>
+              <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                <div class="nav-label">Cotisation</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="nav-label">Quartier</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="nav-label">Messages</div>
+              </div>
+              <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="nav-label">Profil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /devices-row -->
+  </div><!-- /mobile section -->
+
+  <!-- ─── TABLET ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Vue Tablette</div>
+    <div class="viewer-title">Espace Habitant — iPad</div>
+    <div class="viewer-sub">768px · Sidebar icônes + contenu principal en deux colonnes</div>
+    <div class="devices-row">
+      <div class="tablet-frame">
+        <div class="tablet-screen">
+          <div class="tablet-app">
+            <!-- Sidebar -->
+            <div class="sidebar-nav">
+              <div class="sidebar-logo">MS</div>
+              <div class="sidebar-item active">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div class="sidebar-item">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="sidebar-item" style="position:relative">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="notif-dot"></div>
+              </div>
+              <div class="sidebar-item">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div style="margin-top:auto">
+                <div class="sidebar-item" style="background:var(--red-soft);color:var(--red);position:relative">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main content -->
+            <div class="tablet-content">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:var(--primary);letter-spacing:.02em">Bonjour 👋</div>
+                  <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.4px">Kofi Mensah</div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div class="icon-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <div class="notif-badge"></div>
+                  </div>
+                  <div class="avatar">KM</div>
+                </div>
+              </div>
+
+              <div class="tablet-toprow">
+                <div class="tablet-hero-card">
+                  <div class="tablet-hero-top">
+                    <div>
+                      <div class="tablet-hero-label">COTISATION</div>
+                      <div class="tablet-hero-amount">25 000 FCFA</div>
+                      <div class="tablet-hero-sub">Septembre 2026 · En attente</div>
+                    </div>
+                    <div class="status-pill pending">En attente</div>
+                  </div>
+                  <div class="mini-bars">
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar paid-bar" style="height:100%"></div>
+                    <div class="mini-bar current-bar" style="height:100%"></div>
+                    <div class="mini-bar future-bar" style="height:60%"></div>
+                    <div class="mini-bar future-bar" style="height:60%"></div>
+                    <div class="mini-bar future-bar" style="height:60%"></div>
+                  </div>
+                  <div style="margin-top:14px;position:relative;z-index:1">
+                    <button style="width:100%;padding:12px;border-radius:var(--r-md);background:rgba(255,255,255,.15);color:#fff;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.2)">Payer maintenant</button>
+                  </div>
+                </div>
+
+                <div class="recents-panel">
+                  <div class="panel-title">Activité récente</div>
+                  <div class="activity-item">
+                    <div class="activity-dot green"></div>
+                    <div class="activity-text">Paiement août confirmé</div>
+                    <div class="activity-time">28 août</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot gold"></div>
+                    <div class="activity-text">Panne éclairage allée B</div>
+                    <div class="activity-time">il y a 2h</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot green"></div>
+                    <div class="activity-text">Nouvelle annonce du syndic</div>
+                    <div class="activity-time">hier</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot red"></div>
+                    <div class="activity-text">Alerte sécurité résolue</div>
+                    <div class="activity-time">26 août</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stats-row">
+                <div class="stat-card">
+                  <div class="stat-label">Mois payés</div>
+                  <div class="stat-value">8/12</div>
+                  <div class="stat-delta up">↑ À jour jusqu'en août</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Total versé</div>
+                  <div class="stat-value">200k</div>
+                  <div class="stat-delta up">FCFA en 2026</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Incidents ouverts</div>
+                  <div class="stat-value">2</div>
+                  <div class="stat-delta down">↗ Dans la cité</div>
+                </div>
+              </div>
+
+              <div class="bottom-panels">
+                <div class="recents-panel">
+                  <div class="panel-title">Incidents du quartier</div>
+                  <div class="activity-item">
+                    <div class="activity-dot gold"></div>
+                    <div class="activity-text">Panne éclairage allée B · Villa 8</div>
+                    <div class="activity-time">2h</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot" style="background:#2196F3"></div>
+                    <div class="activity-text">Fuite d'eau canalisation principale</div>
+                    <div class="activity-time">hier</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot green"></div>
+                    <div class="activity-text">Déchets zone commune non collectés</div>
+                    <div class="activity-time">3j</div>
+                  </div>
+                </div>
+                <div class="recents-panel">
+                  <div class="panel-title">Annonces</div>
+                  <div class="activity-item">
+                    <div class="activity-dot" style="background:var(--primary)"></div>
+                    <div class="activity-text">Réunion copropriétaires — 12 sept.</div>
+                    <div class="activity-time">auj.</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot gold"></div>
+                    <div class="activity-text">Coupure d'eau vendredi matin</div>
+                    <div class="activity-time">hier</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot" style="background:var(--primary)"></div>
+                    <div class="activity-text">Nouveau code portail principal</div>
+                    <div class="activity-time">28 août</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DESKTOP ─── -->
+  <div class="viewer-section">
+    <div class="viewer-label">Vue Desktop</div>
+    <div class="viewer-title">Espace Syndic — Dashboard</div>
+    <div class="viewer-sub">1280px · Sidebar complète + tableau de bord financier</div>
+    <div class="desktop-frame">
+      <div class="desktop-bar">
+        <div class="desktop-dot" style="background:#FF5F57"></div>
+        <div class="desktop-dot" style="background:#FEBC2E"></div>
+        <div class="desktop-dot" style="background:#28C840"></div>
+      </div>
+      <div class="desktop-screen">
+        <div class="desktop-app">
+
+          <!-- Sidebar -->
+          <div class="desktop-sidebar">
+            <div class="desktop-logo">
+              <div class="desktop-logo-icon">MS</div>
+              <div>
+                <div class="desktop-logo-text">MySyndic</div>
+                <div class="desktop-logo-cite">Synacassy 1</div>
+              </div>
+            </div>
+
+            <div class="sidebar-group-label">Principal</div>
+            <div class="desktop-nav-item active">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Tableau de bord
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              Paiements
+              <span class="nav-badge">8</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Habitants
+            </div>
+            <div class="sidebar-group-label">Vie de la cité</div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Incidents
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Annonces
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Conflits
+              <span class="nav-badge" style="background:var(--gold);color:var(--ink)">3</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Messages
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Documents
+            </div>
+
+            <div class="desktop-sidebar-footer">
+              <div class="desktop-user">
+                <div class="desktop-avatar">AS</div>
+                <div>
+                  <div class="desktop-user-name">Ama Sika</div>
+                  <div class="desktop-user-role">Syndic · Synacassy 1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main -->
+          <div class="desktop-main">
+            <div class="desktop-header">
+              <div>
+                <div class="desktop-page-title">Tableau de bord</div>
+                <div class="desktop-page-sub">Septembre 2026 · Synacassy 1</div>
+              </div>
+              <div class="desktop-header-actions">
+                <button class="btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Exporter Excel
+                </button>
+                <button class="btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Enregistrer paiement
+                </button>
+              </div>
+            </div>
+
+            <div class="desktop-body">
+              <!-- KPIs -->
+              <div class="desktop-kpis">
+                <div class="kpi-card">
+                  <div class="kpi-icon teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                  <div class="kpi-info">
+                    <div class="kpi-label">Collecté ce mois</div>
+                    <div class="kpi-value">2,65M</div>
+                    <div class="kpi-delta up">↑ +3 depuis hier</div>
+                  </div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                  <div class="kpi-info">
+                    <div class="kpi-label">Villas à jour</div>
+                    <div class="kpi-value">106/143</div>
+                    <div class="kpi-delta up">74% de recouvrement</div>
+                  </div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon gold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div class="kpi-info">
+                    <div class="kpi-label">Impayés</div>
+                    <div class="kpi-value">37</div>
+                    <div class="kpi-delta mid">925 000 FCFA</div>
+                  </div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon red">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  <div class="kpi-info">
+                    <div class="kpi-label">Alertes ce mois</div>
+                    <div class="kpi-value">4</div>
+                    <div class="kpi-delta up">Toutes résolues</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Table + Alerts -->
+              <div class="desktop-bottom-grid">
+                <div class="data-table-card">
+                  <div class="data-table-head">
+                    <div class="data-table-title">Habitants — Statuts paiement</div>
+                    <div class="data-filter">
+                      <div class="filter-pill active">Tous</div>
+                      <div class="filter-pill">Impayés</div>
+                      <div class="filter-pill">Payés</div>
+                    </div>
+                  </div>
+                  <div class="table-row table-header-row">
+                    <div>Habitant</div>
+                    <div>Montant</div>
+                    <div>Statut</div>
+                    <div></div>
+                  </div>
+                  <div class="table-row">
+                    <div class="table-row-name">
+                      <div class="table-mini-avatar">KM</div>
+                      <div><div class="table-name">Kofi Mensah</div><div class="table-villa">Villa 14</div></div>
+                    </div>
+                    <div class="table-amount">25 000</div>
+                    <div><span class="table-status pending">En attente</span></div>
+                    <div class="table-action">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    </div>
+                  </div>
+                  <div class="table-row">
+                    <div class="table-row-name">
+                      <div class="table-mini-avatar" style="background:var(--emerald-soft);color:var(--emerald)">AB</div>
+                      <div><div class="table-name">Ama Brou</div><div class="table-villa">Villa 7</div></div>
+                    </div>
+                    <div class="table-amount">25 000</div>
+                    <div><span class="table-status paid">Payé</span></div>
+                    <div class="table-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                  </div>
+                  <div class="table-row">
+                    <div class="table-row-name">
+                      <div class="table-mini-avatar" style="background:var(--red-soft);color:var(--red)">YK</div>
+                      <div><div class="table-name">Yao Kouassi</div><div class="table-villa">Villa 22</div></div>
+                    </div>
+                    <div class="table-amount">25 000</div>
+                    <div><span class="table-status late">Impayé</span></div>
+                    <div class="table-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                  </div>
+                  <div class="table-row">
+                    <div class="table-row-name">
+                      <div class="table-mini-avatar" style="background:var(--emerald-soft);color:var(--emerald)">FD</div>
+                      <div><div class="table-name">Fatou Diallo</div><div class="table-villa">Villa 3</div></div>
+                    </div>
+                    <div class="table-amount">25 000</div>
+                    <div><span class="table-status paid">Payé</span></div>
+                    <div class="table-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                  </div>
+                  <div class="table-row" style="border-bottom:none">
+                    <div class="table-row-name">
+                      <div class="table-mini-avatar" style="background:var(--gold-soft);color:var(--gold)">MO</div>
+                      <div><div class="table-name">Mamadou Ouédraogo</div><div class="table-villa">Villa 11</div></div>
+                    </div>
+                    <div class="table-amount">25 000</div>
+                    <div><span class="table-status pending">En attente</span></div>
+                    <div class="table-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                  </div>
+                </div>
+
+                <!-- Alert panel -->
+                <div class="alert-panel">
+                  <div class="data-table-head">
+                    <div class="data-table-title">Alertes sécurité</div>
+                    <span class="chip red" style="font-size:11px;padding:3px 10px">4 ce mois</span>
+                  </div>
+                  <div class="alert-item-d">
+                    <div class="alert-severity high"></div>
+                    <div class="alert-d-icon" style="background:var(--red-soft);color:var(--red)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="alert-d-body">
+                      <div class="alert-d-title">Intrusion signalée — Villa 31</div>
+                      <div class="alert-d-sub">Agent en route depuis 4 min</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                      <div class="alert-d-time">14:32</div>
+                      <span class="alert-tag on-route">En route</span>
+                    </div>
+                  </div>
+                  <div class="alert-item-d">
+                    <div class="alert-severity medium"></div>
+                    <div class="alert-d-icon" style="background:var(--gold-soft);color:var(--gold)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="alert-d-body">
+                      <div class="alert-d-title">Malaise médical — Villa 8</div>
+                      <div class="alert-d-sub">Agent sur place</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                      <div class="alert-d-time">11:15</div>
+                      <span class="alert-tag on-route">Sur place</span>
+                    </div>
+                  </div>
+                  <div class="alert-item-d">
+                    <div class="alert-severity low"></div>
+                    <div class="alert-d-icon" style="background:var(--emerald-soft);color:var(--emerald)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="alert-d-body">
+                      <div class="alert-d-title">Autre urgence — Villa 5</div>
+                      <div class="alert-d-sub">Clôturée à 09:47</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                      <div class="alert-d-time">09:22</div>
+                      <span class="alert-tag resolved">Résolu</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /desktop-app -->
+      </div><!-- /screen -->
+    </div><!-- /desktop-frame -->
+  </div><!-- /section -->
+
+</div><!-- /viewer -->
+</body>
+</html>

@@ -1,0 +1,942 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alerte_securite {
+  id                                     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                                String         @db.Uuid
+  habitant_id                            String         @db.Uuid
+  villa_id                               String?        @db.Uuid
+  motif_id                               Int?
+  description                            String?
+  photo_file_path                        String?        @db.VarChar(500)
+  silencieuse                            Boolean?       @default(false)
+  statut_id                              Int?
+  escalade                               Boolean?       @default(false)
+  escalade_at                            DateTime?      @db.Timestamp(6)
+  resolu_par                             String?        @db.Uuid
+  resolu_at                              DateTime?      @db.Timestamp(6)
+  created_at                             DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at                             DateTime?      @db.Timestamp(6)
+  deleted_at                             DateTime?      @db.Timestamp(6)
+  is_deleted                             Boolean?       @default(false)
+  created_by                             String?        @db.Uuid
+  updated_by                             String?        @db.Uuid
+  deleted_by                             String?        @db.Uuid
+  cite                                   cite           @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_alerte_securite_habitant_idTouser user           @relation("alerte_securite_habitant_idTouser", fields: [habitant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  motif_alerte                           motif_alerte?  @relation(fields: [motif_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_alerte_securite_resolu_parTouser  user?          @relation("alerte_securite_resolu_parTouser", fields: [resolu_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statut_alerte                          statut_alerte? @relation(fields: [statut_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa                                  villa?         @relation(fields: [villa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_alerte_cite_id")
+  @@index([created_at], map: "idx_alerte_created_at")
+  @@index([escalade], map: "idx_alerte_escalade")
+  @@index([is_deleted], map: "idx_alerte_is_deleted")
+  @@index([statut_id], map: "idx_alerte_statut_id")
+}
+
+model annonce {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id           String             @db.Uuid
+  auteur_id         String             @db.Uuid
+  categorie_id      Int?
+  titre             String             @db.VarChar(255)
+  contenu           String
+  est_epinglee      Boolean?           @default(false)
+  created_at        DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?          @db.Timestamp(6)
+  deleted_at        DateTime?          @db.Timestamp(6)
+  is_deleted        Boolean?           @default(false)
+  created_by        String?            @db.Uuid
+  updated_by        String?            @db.Uuid
+  deleted_by        String?            @db.Uuid
+  user              user               @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categorie_annonce categorie_annonce? @relation(fields: [categorie_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cite              cite               @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_annonce_cite_id")
+  @@index([est_epinglee], map: "idx_annonce_epinglee")
+}
+
+model app_config {
+  id          Int       @id @default(autoincrement())
+  key         String    @unique @db.VarChar(100)
+  value       String?   @db.VarChar(500)
+  module      String?   @db.VarChar(100)
+  description String?
+  created_at  DateTime? @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+  deleted_at  DateTime? @db.Timestamp(6)
+  is_deleted  Boolean?  @default(false)
+  created_by  Int?
+  updated_by  Int?
+  deleted_by  Int?
+}
+
+model audit_log {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id           String?   @db.Uuid
+  user_id           String?   @db.Uuid
+  profil_actif_code String?   @db.VarChar(100)
+  action            String    @db.VarChar(100)
+  entite            String    @db.VarChar(100)
+  entite_id         String?   @db.VarChar(255)
+  anciennes_valeurs Json?
+  nouvelles_valeurs Json?
+  ip_address        String?   @db.VarChar(45)
+  user_agent        String?   @db.VarChar(500)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  cite              cite?     @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user              user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_audit_cite_id")
+  @@index([created_at], map: "idx_audit_created_at")
+  @@index([entite], map: "idx_audit_entite")
+  @@index([profil_actif_code], map: "idx_audit_profil_actif")
+  @@index([user_id], map: "idx_audit_user_id")
+}
+
+model canal_paiement {
+  id         Int        @id
+  libelle    String?    @db.VarChar(255)
+  code       String     @unique @db.VarChar(100)
+  is_manuel  Boolean?   @default(false)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  paiement   paiement[]
+}
+
+model categorie_annonce {
+  id         Int       @id
+  libelle    String?   @db.VarChar(255)
+  code       String    @unique @db.VarChar(100)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  is_deleted Boolean?  @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  annonce    annonce[]
+}
+
+model categorie_conflit {
+  id         Int       @id
+  libelle    String?   @db.VarChar(255)
+  code       String    @unique @db.VarChar(100)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  is_deleted Boolean?  @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  conflit    conflit[]
+}
+
+model categorie_incident {
+  id         Int        @id
+  libelle    String?    @db.VarChar(255)
+  code       String     @unique @db.VarChar(100)
+  icon_name  String?    @db.VarChar(100)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  incident   incident[]
+}
+
+model cite {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom                String               @db.VarChar(255)
+  ville              String?              @db.VarChar(255)
+  pays               String?              @default("Côte d'Ivoire") @db.VarChar(100)
+  is_active          Boolean?             @default(true)
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @db.Timestamp(6)
+  deleted_at         DateTime?            @db.Timestamp(6)
+  is_deleted         Boolean?             @default(false)
+  created_by         String?              @db.Uuid
+  updated_by         String?              @db.Uuid
+  deleted_by         String?              @db.Uuid
+  alerte_securite    alerte_securite[]
+  annonce            annonce[]
+  audit_log          audit_log[]
+  configuration      configuration?
+  conflit            conflit[]
+  document           document[]
+  feed_post          feed_post[]
+  feed_post_media    feed_post_media[]
+  groupe_cite        groupe_cite?
+  groupe_cite_membre groupe_cite_membre[]
+  incident           incident[]
+  message            message[]
+  notification       notification[]
+  paiement           paiement[]
+  recu_paiement      recu_paiement[]
+  user               user[]
+  user_profil        user_profil[]
+  user_villa         user_villa[]
+  villa              villa[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model configuration {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                   String    @unique @db.Uuid
+  cotisation_mensuelle      Int?
+  lien_wave                 String?   @db.VarChar(500)
+  telephone_syndic          String?   @db.VarChar(50)
+  telephone_urgence         String?   @db.VarChar(50)
+  paystack_subaccount_code  String?   @db.VarChar(255)
+  paystack_subaccount_mode  String?   @default("SIMPLE") @db.VarChar(10)
+  paystack_subaccount_split Int?      @default(100)
+  nombre_villas_attendu     Int?
+  created_at                DateTime? @default(now()) @db.Timestamp(6)
+  updated_at                DateTime? @db.Timestamp(6)
+  deleted_at                DateTime? @db.Timestamp(6)
+  is_deleted                Boolean?  @default(false)
+  created_by                String?   @db.Uuid
+  updated_by                String?   @db.Uuid
+  deleted_by                String?   @db.Uuid
+  cite                      cite      @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model conflit {
+  id                                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                                 String             @db.Uuid
+  declarant_id                            String             @db.Uuid
+  villa_declarant_id                      String?            @db.Uuid
+  categorie_id                            Int?
+  villa_ciblee_id                         String?            @db.Uuid
+  villa_ciblee_num                        String             @db.VarChar(50)
+  description                             String
+  statut_id                               Int?
+  note_syndic                             String?
+  resolution_note                         String?
+  pris_en_charge_par                      String?            @db.Uuid
+  pris_en_charge_at                       DateTime?          @db.Timestamp(6)
+  resolu_at                               DateTime?          @db.Timestamp(6)
+  created_at                              DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at                              DateTime?          @db.Timestamp(6)
+  deleted_at                              DateTime?          @db.Timestamp(6)
+  is_deleted                              Boolean?           @default(false)
+  created_by                              String?            @db.Uuid
+  updated_by                              String?            @db.Uuid
+  deleted_by                              String?            @db.Uuid
+  categorie_conflit                       categorie_conflit? @relation(fields: [categorie_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cite                                    cite               @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_conflit_declarant_idTouser         user               @relation("conflit_declarant_idTouser", fields: [declarant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_conflit_pris_en_charge_parTouser   user?              @relation("conflit_pris_en_charge_parTouser", fields: [pris_en_charge_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statut_conflit                          statut_conflit?    @relation(fields: [statut_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa_conflit_villa_ciblee_idTovilla    villa?             @relation("conflit_villa_ciblee_idTovilla", fields: [villa_ciblee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa_conflit_villa_declarant_idTovilla villa?             @relation("conflit_villa_declarant_idTovilla", fields: [villa_declarant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_conflit_cite_id")
+  @@index([declarant_id], map: "idx_conflit_declarant")
+  @@index([statut_id], map: "idx_conflit_statut_id")
+}
+
+model document {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id       String         @db.Uuid
+  auteur_id     String         @db.Uuid
+  titre         String         @db.VarChar(255)
+  file_path     String         @db.VarChar(500)
+  type_id       Int?
+  taille_ko     Int?
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?      @db.Timestamp(6)
+  deleted_at    DateTime?      @db.Timestamp(6)
+  is_deleted    Boolean?       @default(false)
+  created_by    String?        @db.Uuid
+  updated_by    String?        @db.Uuid
+  deleted_by    String?        @db.Uuid
+  user          user           @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cite          cite           @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  type_document type_document? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_document_cite_id")
+}
+
+model feature {
+  id             Int              @id @default(autoincrement())
+  libelle        String?          @db.VarChar(255)
+  code           String           @unique @db.VarChar(100)
+  module         String?          @db.VarChar(100)
+  created_at     DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?        @db.Timestamp(6)
+  deleted_at     DateTime?        @db.Timestamp(6)
+  is_deleted     Boolean?         @default(false)
+  created_by     Int?
+  updated_by     Int?
+  deleted_by     Int?
+  profil_feature profil_feature[]
+}
+
+/// Le type du post (texte / photo / vidéo) se déduit des lignes feed_post_media.
+model feed_post {
+  id                   String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id              String                  @db.Uuid
+  auteur_id            String                  @db.Uuid
+  contenu              String?
+  likes_count          Int                     @default(0)
+  commentaires_count   Int                     @default(0)
+  created_at           DateTime?               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?               @db.Timestamp(6)
+  deleted_at           DateTime?               @db.Timestamp(6)
+  is_deleted           Boolean?                @default(false)
+  created_by           String?                 @db.Uuid
+  updated_by           String?                 @db.Uuid
+  deleted_by           String?                 @db.Uuid
+  cite                 cite                    @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                 user                    @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feed_post_commentaire feed_post_commentaire[]
+  feed_post_like       feed_post_like[]
+  feed_post_media      feed_post_media[]
+
+  @@index([auteur_id], map: "idx_feed_post_auteur_id")
+  @@index([is_deleted], map: "idx_feed_post_is_deleted")
+}
+
+model feed_post_commentaire {
+  id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id                     String                  @db.Uuid
+  auteur_id                   String                  @db.Uuid
+  parent_id                   String?                 @db.Uuid
+  niveau                      Int                     @default(1) @db.SmallInt
+  texte                       String
+  created_at                  DateTime?               @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime?               @db.Timestamp(6)
+  deleted_at                  DateTime?               @db.Timestamp(6)
+  is_deleted                  Boolean?                @default(false)
+  created_by                  String?                 @db.Uuid
+  updated_by                  String?                 @db.Uuid
+  deleted_by                  String?                 @db.Uuid
+  user                        user                    @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feed_post                   feed_post               @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feed_post_commentaire        feed_post_commentaire?  @relation("feed_post_commentaireTofeed_post_commentaire", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_feed_post_commentaire  feed_post_commentaire[] @relation("feed_post_commentaireTofeed_post_commentaire")
+
+  @@index([auteur_id], map: "idx_feed_comment_auteur_id")
+  @@index([niveau], map: "idx_feed_comment_niveau")
+  @@index([parent_id], map: "idx_feed_comment_parent_id")
+}
+
+model feed_post_like {
+  post_id    String     @db.Uuid
+  user_id    String     @db.Uuid
+  created_at DateTime?  @default(now()) @db.Timestamp(6)
+  feed_post  feed_post  @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([post_id, user_id])
+  @@index([user_id], map: "idx_feed_like_user_id")
+}
+
+model feed_post_media {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id    String     @db.Uuid
+  cite_id    String     @db.Uuid
+  type       String     @db.VarChar(20)
+  file_path  String     @db.VarChar(500)
+  mime_type  String     @db.VarChar(100)
+  taille_ko  Int?
+  ordre      Int        @default(1) @db.SmallInt
+  largeur    Int?
+  hauteur    Int?
+  duree_sec  Int?
+  created_at DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by String?    @db.Uuid
+  updated_by String?    @db.Uuid
+  deleted_by String?    @db.Uuid
+  cite       cite       @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feed_post  feed_post  @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([post_id, ordre])
+  @@index([cite_id], map: "idx_feed_media_cite_id")
+}
+
+model groupe_cite {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id            String               @unique @db.Uuid
+  nom                String               @db.VarChar(255)
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @db.Timestamp(6)
+  deleted_at         DateTime?            @db.Timestamp(6)
+  is_deleted         Boolean?             @default(false)
+  created_by         String?              @db.Uuid
+  updated_by         String?              @db.Uuid
+  deleted_by         String?              @db.Uuid
+  cite               cite                 @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  groupe_cite_membre groupe_cite_membre[]
+  message            message[]
+}
+
+model groupe_cite_membre {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupe_id   String      @db.Uuid
+  user_id     String      @db.Uuid
+  cite_id     String      @db.Uuid
+  joined_at   DateTime?   @default(now()) @db.Timestamp(6)
+  left_at     DateTime?   @db.Timestamp(6)
+  created_at  DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?   @db.Timestamp(6)
+  deleted_at  DateTime?   @db.Timestamp(6)
+  is_deleted  Boolean?    @default(false)
+  created_by  String?     @db.Uuid
+  updated_by  String?     @db.Uuid
+  deleted_by  String?     @db.Uuid
+  cite        cite        @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  groupe_cite groupe_cite @relation(fields: [groupe_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([groupe_id, user_id])
+  @@index([cite_id], map: "idx_gcm_cite_id")
+  @@index([groupe_id], map: "idx_gcm_groupe_id")
+  @@index([user_id], map: "idx_gcm_user_id")
+}
+
+model incident {
+  id                                      String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                                 String                 @db.Uuid
+  auteur_id                               String                 @db.Uuid
+  villa_id                                String?                @db.Uuid
+  categorie_id                            Int?
+  titre                                   String?                @db.VarChar(255)
+  description                             String
+  photo_file_path                         String?                @db.VarChar(500)
+  statut_id                               Int?
+  note_syndic                             String?
+  pris_en_charge_par                      String?                @db.Uuid
+  pris_en_charge_at                       DateTime?              @db.Timestamp(6)
+  resolu_par                              String?                @db.Uuid
+  resolu_at                               DateTime?              @db.Timestamp(6)
+  created_at                              DateTime?              @default(now()) @db.Timestamp(6)
+  updated_at                              DateTime?              @db.Timestamp(6)
+  deleted_at                              DateTime?              @db.Timestamp(6)
+  is_deleted                              Boolean?               @default(false)
+  created_by                              String?                @db.Uuid
+  updated_by                              String?                @db.Uuid
+  deleted_by                              String?                @db.Uuid
+  user                                    user                   @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categorie_incident                      categorie_incident?    @relation(fields: [categorie_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cite                                    cite                   @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa                                   villa?                 @relation(fields: [villa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statut_incident                         statut_incident?       @relation(fields: [statut_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_incident_pris_en_charge_parTouser  user?                  @relation("incident_pris_en_charge_parTouser", fields: [pris_en_charge_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_incident_resolu_parTouser          user?                  @relation("incident_resolu_parTouser", fields: [resolu_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  incident_commentaire                    incident_commentaire[]
+  incident_like                           incident_like[]
+
+  @@index([auteur_id], map: "idx_incident_auteur_id")
+  @@index([cite_id], map: "idx_incident_cite_id")
+  @@index([is_deleted], map: "idx_incident_is_deleted")
+  @@index([statut_id], map: "idx_incident_statut_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model incident_commentaire {
+  id                         String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  incident_id                String                 @db.Uuid
+  auteur_id                  String                 @db.Uuid
+  parent_id                  String?                @db.Uuid
+  niveau                     Int                    @default(1) @db.SmallInt
+  texte                      String
+  created_at                 DateTime?              @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime?              @db.Timestamp(6)
+  deleted_at                 DateTime?              @db.Timestamp(6)
+  is_deleted                 Boolean?               @default(false)
+  created_by                 String?                @db.Uuid
+  updated_by                 String?                @db.Uuid
+  deleted_by                 String?                @db.Uuid
+  user                       user                   @relation(fields: [auteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  incident                   incident               @relation(fields: [incident_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  incident_commentaire       incident_commentaire?  @relation("incident_commentaireToincident_commentaire", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_incident_commentaire incident_commentaire[] @relation("incident_commentaireToincident_commentaire")
+
+  @@index([incident_id], map: "idx_comment_incident_id")
+  @@index([niveau], map: "idx_comment_niveau")
+  @@index([parent_id], map: "idx_comment_parent_id")
+}
+
+model incident_like {
+  incident_id String    @db.Uuid
+  user_id     String    @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  incident    incident  @relation(fields: [incident_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([incident_id, user_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model message {
+  id                                 String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                            String       @db.Uuid
+  groupe_id                          String?      @db.Uuid
+  expediteur_id                      String       @db.Uuid
+  destinataire_id                    String?      @db.Uuid
+  mongo_doc_id                       String?      @db.VarChar(255)
+  est_groupe                         Boolean      @default(false)
+  created_at                         DateTime?    @default(now()) @db.Timestamp(6)
+  updated_at                         DateTime?    @db.Timestamp(6)
+  deleted_at                         DateTime?    @db.Timestamp(6)
+  is_deleted                         Boolean?     @default(false)
+  created_by                         String?      @db.Uuid
+  updated_by                         String?      @db.Uuid
+  deleted_by                         String?      @db.Uuid
+  cite                               cite         @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_message_destinataire_idTouser user?        @relation("message_destinataire_idTouser", fields: [destinataire_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_message_expediteur_idTouser   user         @relation("message_expediteur_idTouser", fields: [expediteur_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  groupe_cite                        groupe_cite? @relation(fields: [groupe_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_message_cite_id")
+  @@index([created_at], map: "idx_message_created_at")
+  @@index([destinataire_id], map: "idx_message_destinataire")
+  @@index([est_groupe], map: "idx_message_est_groupe")
+  @@index([expediteur_id], map: "idx_message_expediteur")
+  @@index([groupe_id], map: "idx_message_groupe_id")
+}
+
+model motif_alerte {
+  id              Int               @id
+  libelle         String?           @db.VarChar(255)
+  code            String            @unique @db.VarChar(100)
+  created_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  is_deleted      Boolean?          @default(false)
+  created_by      Int?
+  updated_by      Int?
+  deleted_by      Int?
+  alerte_securite alerte_securite[]
+}
+
+model notification {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id           String             @db.Uuid
+  user_id           String             @db.Uuid
+  type_id           Int?
+  titre             String             @db.VarChar(255)
+  message           String?
+  lu                Boolean?           @default(false)
+  lu_at             DateTime?          @db.Timestamp(6)
+  data              Json?
+  created_at        DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?          @db.Timestamp(6)
+  deleted_at        DateTime?          @db.Timestamp(6)
+  is_deleted        Boolean?           @default(false)
+  created_by        String?            @db.Uuid
+  updated_by        String?            @db.Uuid
+  deleted_by        String?            @db.Uuid
+  cite              cite               @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  type_notification type_notification? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user              user               @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_notif_cite_id")
+  @@index([lu], map: "idx_notif_lu")
+  @@index([user_id], map: "idx_notif_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model otp {
+  id             Int       @id @default(autoincrement())
+  code           String    @db.VarChar(10)
+  user_id        String    @db.VarChar(255)
+  contexte       String    @default("GENERAL") @db.VarChar(50)
+  email_dest     String?   @db.VarChar(255)
+  is_used        Boolean   @default(false)
+  attempts_count Int       @default(0)
+  expires_at     DateTime  @db.Timestamp(6)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @db.Timestamp(6)
+  deleted_at     DateTime? @db.Timestamp(6)
+  is_deleted     Boolean   @default(false)
+  created_by     Int?
+  updated_by     Int?
+  deleted_by     Int?
+
+  @@index([contexte], map: "idx_otp_contexte")
+  @@index([expires_at], map: "idx_otp_expires_at")
+  @@index([user_id], map: "idx_otp_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model paiement {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id            String           @db.Uuid
+  villa_id           String           @db.Uuid
+  saisi_par          String?          @db.Uuid
+  mois               String           @db.VarChar(7)
+  montant            Int
+  statut_id          Int?
+  canal_id           Int?
+  reference_paystack String?          @db.VarChar(255)
+  reference_externe  String?          @db.VarChar(255)
+  preuve_file_path   String?          @db.VarChar(500)
+  note               String?
+  created_at         DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?        @db.Timestamp(6)
+  deleted_at         DateTime?        @db.Timestamp(6)
+  is_deleted         Boolean?         @default(false)
+  created_by         String?          @db.Uuid
+  updated_by         String?          @db.Uuid
+  deleted_by         String?          @db.Uuid
+  canal_paiement     canal_paiement?  @relation(fields: [canal_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cite               cite             @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user               user?            @relation(fields: [saisi_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statut_paiement    statut_paiement? @relation(fields: [statut_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa              villa            @relation(fields: [villa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  recu_paiement      recu_paiement?
+
+  @@unique([cite_id, villa_id, mois])
+  @@index([canal_id], map: "idx_paiement_canal_id")
+  @@index([cite_id], map: "idx_paiement_cite_id")
+  @@index([is_deleted], map: "idx_paiement_is_deleted")
+  @@index([mois], map: "idx_paiement_mois")
+  @@index([statut_id], map: "idx_paiement_statut_id")
+  @@index([villa_id], map: "idx_paiement_villa_id")
+}
+
+model profil {
+  id                     Int                      @id
+  libelle                String?                  @db.VarChar(255)
+  code                   String                   @unique @db.VarChar(100)
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at             DateTime?                @db.Timestamp(6)
+  deleted_at             DateTime?                @db.Timestamp(6)
+  is_deleted             Boolean?                 @default(false)
+  created_by             Int?
+  updated_by             Int?
+  deleted_by             Int?
+  profil_feature         profil_feature[]
+  profil_feature_version profil_feature_version[]
+  user_profil            user_profil[]
+}
+
+model profil_feature {
+  id          Int       @id @default(autoincrement())
+  profil_id   Int
+  feature_id  Int
+  version_tag String    @default("v1.0") @db.VarChar(50)
+  valid_from  DateTime  @default(now()) @db.Timestamp(6)
+  valid_until DateTime? @db.Timestamp(6)
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+  deleted_at  DateTime? @db.Timestamp(6)
+  is_deleted  Boolean?  @default(false)
+  created_by  Int?
+  updated_by  Int?
+  deleted_by  Int?
+  feature     feature   @relation(fields: [feature_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profil      profil    @relation(fields: [profil_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([profil_id, feature_id, version_tag])
+  @@index([feature_id], map: "idx_pf_feature_id")
+  @@index([profil_id], map: "idx_pf_profil_id")
+  @@index([valid_from], map: "idx_pf_valid_from")
+  @@index([version_tag], map: "idx_pf_version_tag")
+}
+
+model profil_feature_version {
+  id                Int       @id @default(autoincrement())
+  profil_id         Int
+  version_tag       String    @db.VarChar(50)
+  features_snapshot Json
+  note              String?
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  created_by        Int?
+  profil            profil    @relation(fields: [profil_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([profil_id, version_tag])
+  @@index([profil_id], map: "idx_pfv_profil_id")
+  @@index([version_tag], map: "idx_pfv_version_tag")
+}
+
+model recu_paiement {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paiement_id   String    @unique @db.Uuid
+  cite_id       String    @db.Uuid
+  villa_id      String    @db.Uuid
+  file_path     String    @db.VarChar(500)
+  qr_code_token String?   @unique @db.VarChar(255)
+  generated_at  DateTime? @default(now()) @db.Timestamp(6)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @db.Timestamp(6)
+  deleted_at    DateTime? @db.Timestamp(6)
+  is_deleted    Boolean?  @default(false)
+  created_by    String?   @db.Uuid
+  updated_by    String?   @db.Uuid
+  deleted_by    String?   @db.Uuid
+  cite          cite      @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  paiement      paiement  @relation(fields: [paiement_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa         villa     @relation(fields: [villa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([paiement_id], map: "idx_recu_paiement_id")
+  @@index([qr_code_token], map: "idx_recu_qr_token")
+}
+
+model statut_alerte {
+  id              Int               @id
+  libelle         String?           @db.VarChar(255)
+  code            String            @unique @db.VarChar(100)
+  created_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  is_deleted      Boolean?          @default(false)
+  created_by      Int?
+  updated_by      Int?
+  deleted_by      Int?
+  alerte_securite alerte_securite[]
+}
+
+model statut_conflit {
+  id         Int       @id
+  libelle    String?   @db.VarChar(255)
+  code       String    @unique @db.VarChar(100)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  is_deleted Boolean?  @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  conflit    conflit[]
+}
+
+model statut_incident {
+  id         Int        @id
+  libelle    String?    @db.VarChar(255)
+  code       String     @unique @db.VarChar(100)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  incident   incident[]
+}
+
+model statut_paiement {
+  id         Int        @id
+  libelle    String?    @db.VarChar(255)
+  code       String     @unique @db.VarChar(100)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  paiement   paiement[]
+}
+
+model type_document {
+  id         Int        @id
+  libelle    String?    @db.VarChar(100)
+  code       String     @unique @db.VarChar(50)
+  extension  String?    @db.VarChar(10)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  deleted_at DateTime?  @db.Timestamp(6)
+  is_deleted Boolean?   @default(false)
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+  document   document[]
+}
+
+model type_notification {
+  id           Int            @id
+  libelle      String?        @db.VarChar(255)
+  code         String         @unique @db.VarChar(100)
+  created_at   DateTime?      @db.Timestamp(6)
+  updated_at   DateTime?      @db.Timestamp(6)
+  deleted_at   DateTime?      @db.Timestamp(6)
+  is_deleted   Boolean?       @default(false)
+  created_by   Int?
+  updated_by   Int?
+  deleted_by   Int?
+  notification notification[]
+}
+
+model user {
+  id                                                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                                           String?                @db.Uuid
+  prenom                                            String                 @db.VarChar(255)
+  nom                                               String                 @db.VarChar(255)
+  email                                             String                 @unique @db.VarChar(255)
+  telephone                                         String?                @db.VarChar(50)
+  password_hash                                     String                 @db.VarChar(255)
+  must_change_password                              Boolean?               @default(false)
+  photo_file_path                                   String?                @db.VarChar(500)
+  is_active                                         Boolean?               @default(true)
+  created_at                                        DateTime?              @default(now()) @db.Timestamp(6)
+  updated_at                                        DateTime?              @db.Timestamp(6)
+  deleted_at                                        DateTime?              @db.Timestamp(6)
+  is_deleted                                        Boolean?               @default(false)
+  created_by                                        String?                @db.Uuid
+  updated_by                                        String?                @db.Uuid
+  deleted_by                                        String?                @db.Uuid
+  alerte_securite_alerte_securite_habitant_idTouser alerte_securite[]      @relation("alerte_securite_habitant_idTouser")
+  alerte_securite_alerte_securite_resolu_parTouser  alerte_securite[]      @relation("alerte_securite_resolu_parTouser")
+  annonce                                           annonce[]
+  audit_log                                         audit_log[]
+  conflit_conflit_declarant_idTouser                conflit[]              @relation("conflit_declarant_idTouser")
+  conflit_conflit_pris_en_charge_parTouser          conflit[]              @relation("conflit_pris_en_charge_parTouser")
+  document                                          document[]
+  feed_post                                         feed_post[]
+  feed_post_commentaire                             feed_post_commentaire[]
+  feed_post_like                                    feed_post_like[]
+  groupe_cite_membre                                groupe_cite_membre[]
+  incident                                          incident[]
+  incident_incident_pris_en_charge_parTouser        incident[]             @relation("incident_pris_en_charge_parTouser")
+  incident_incident_resolu_parTouser                incident[]             @relation("incident_resolu_parTouser")
+  incident_commentaire                              incident_commentaire[]
+  incident_like                                     incident_like[]
+  message_message_destinataire_idTouser             message[]              @relation("message_destinataire_idTouser")
+  message_message_expediteur_idTouser               message[]              @relation("message_expediteur_idTouser")
+  notification                                      notification[]
+  paiement                                          paiement[]
+  cite                                              cite?                  @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_profil                                       user_profil[]
+  user_villa                                        user_villa[]
+
+  @@index([cite_id], map: "idx_user_cite_id")
+  @@index([email], map: "idx_user_email")
+  @@index([is_active], map: "idx_user_is_active")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_profil {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String    @db.Uuid
+  profil_id      Int
+  cite_id        String?   @db.Uuid
+  order_priority Int       @default(1) @db.SmallInt
+  is_active      Boolean?  @default(true)
+  assigned_at    DateTime? @default(now()) @db.Timestamp(6)
+  assigned_by    String?   @db.Uuid
+  revoked_at     DateTime? @db.Timestamp(6)
+  revoked_by     String?   @db.Uuid
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @db.Timestamp(6)
+  deleted_at     DateTime? @db.Timestamp(6)
+  is_deleted     Boolean?  @default(false)
+  created_by     String?   @db.Uuid
+  updated_by     String?   @db.Uuid
+  deleted_by     String?   @db.Uuid
+  cite           cite?     @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profil         profil    @relation(fields: [profil_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, profil_id, cite_id])
+  @@index([cite_id], map: "idx_up_cite_id")
+  @@index([is_active], map: "idx_up_is_active")
+  @@index([profil_id], map: "idx_up_profil_id")
+  @@index([user_id], map: "idx_up_user_id")
+}
+
+model user_villa {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String    @db.Uuid
+  villa_id    String    @db.Uuid
+  cite_id     String    @db.Uuid
+  is_current  Boolean?  @default(true)
+  is_confirme Boolean?  @default(true)
+  assigned_at DateTime? @default(now()) @db.Timestamp(6)
+  assigned_by String?   @db.Uuid
+  revoked_at  DateTime? @db.Timestamp(6)
+  revoked_by  String?   @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+  deleted_at  DateTime? @db.Timestamp(6)
+  is_deleted  Boolean?  @default(false)
+  created_by  String?   @db.Uuid
+  updated_by  String?   @db.Uuid
+  deleted_by  String?   @db.Uuid
+  cite        cite      @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  villa       villa     @relation(fields: [villa_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cite_id], map: "idx_user_villa_cite_id")
+  @@index([is_current], map: "idx_user_villa_current")
+  @@index([user_id], map: "idx_user_villa_user_id")
+  @@index([villa_id], map: "idx_user_villa_villa_id")
+}
+
+model villa {
+  id                                        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cite_id                                   String            @db.Uuid
+  numero                                    String            @db.VarChar(50)
+  rue                                       String?           @db.VarChar(255)
+  description                               String?
+  is_active                                 Boolean?          @default(true)
+  created_at                                DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at                                DateTime?         @db.Timestamp(6)
+  deleted_at                                DateTime?         @db.Timestamp(6)
+  is_deleted                                Boolean?          @default(false)
+  created_by                                String?           @db.Uuid
+  updated_by                                String?           @db.Uuid
+  deleted_by                                String?           @db.Uuid
+  alerte_securite                           alerte_securite[]
+  conflit_conflit_villa_ciblee_idTovilla    conflit[]         @relation("conflit_villa_ciblee_idTovilla")
+  conflit_conflit_villa_declarant_idTovilla conflit[]         @relation("conflit_villa_declarant_idTovilla")
+  incident                                  incident[]
+  paiement                                  paiement[]
+  recu_paiement                             recu_paiement[]
+  user_villa                                user_villa[]
+  cite                                      cite              @relation(fields: [cite_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([cite_id, numero])
+  @@index([cite_id], map: "idx_villa_cite_id")
+  @@index([numero], map: "idx_villa_numero")
+}
+
+model webhook {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  aggregateur_code String    @db.VarChar(100)
+  event            String?   @db.VarChar(100)
+  reference        String    @db.VarChar(255)
+  signature_ok     Boolean?  @default(false)
+  payload_requete  String?
+  payload_reponse  String?
+  montant_attendu  Int?
+  montant_recu     Int?
+  montant_match    Boolean?  @default(dbgenerated("(montant_recu = montant_attendu)"))
+  traite           Boolean?  @default(false)
+  traite_at        DateTime? @db.Timestamp(6)
+  erreur           String?
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @db.Timestamp(6)
+  deleted_at       DateTime? @db.Timestamp(6)
+  is_deleted       Boolean?  @default(false)
+  created_by       String?   @db.Uuid
+  updated_by       String?   @db.Uuid
+  deleted_by       String?   @db.Uuid
+
+  @@unique([aggregateur_code, reference])
+  @@index([aggregateur_code], map: "idx_webhook_aggregateur")
+  @@index([reference], map: "idx_webhook_reference")
+  @@index([traite], map: "idx_webhook_traite")
+}

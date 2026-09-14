@@ -1,0 +1,7 @@
+services:
+  api:
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/mysyndic_db
+      REDIS_URL: redis://redis:6379
+      MONGO_URI: mongodb://mongo:mongo@mongodb:27017/mysyndic_messages?authSource=admin
+      MINIO_ENDPOINT: minio

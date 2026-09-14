@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySyndic — Design System Part 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #F5F7F4;
+  --surface:      #FFFFFF;
+  --surface-2:    #F0F3F0;
+  --ink:          #0F1E2D;
+  --ink-2:        #3A5068;
+  --ink-3:        #8BA4B8;
+  --border:       #E2EAE7;
+
+  --primary:      #0D6E5A;
+  --primary-light:#E6F5F1;
+  --primary-mid:  #0A5A49;
+  --primary-dark: #083D31;
+
+  --gold:         #E8A020;
+  --gold-soft:    #FEF3DC;
+  --emerald:      #00A87C;
+  --emerald-soft: #DDFAF0;
+  --red:          #E8453C;
+  --red-soft:     #FDECEA;
+  --red-glow:     rgba(232,69,60,.38);
+
+  --shadow-card:  0 1px 4px rgba(13,110,90,.06), 0 4px 16px rgba(13,110,90,.07);
+  --shadow-float: 0 8px 32px rgba(13,110,90,.14);
+  --shadow-fab:   0 6px 24px rgba(232,69,60,.42);
+
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  20px;
+  --r-xl:  24px;
+  --r-pill:999px;
+
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: #E8EDE8; color: var(--ink); }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* ── VIEWER ── */
+.viewer { min-height: 100vh; padding: 40px 24px 80px; display: flex; flex-direction: column; align-items: center; gap: 70px; }
+.viewer-section { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 16px; }
+.viewer-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #6a8a7a; text-transform: uppercase; }
+.viewer-title { font-size: 28px; font-weight: 800; color: #1a2e24; letter-spacing: -.5px; margin-bottom: 4px; }
+.viewer-sub { font-size: 14px; color: #6a8a7a; font-weight: 500; margin-bottom: 20px; }
+
+.devices-row { display: flex; align-items: flex-start; gap: 40px; flex-wrap: wrap; justify-content: center; }
+
+/* ── PHONE FRAME ── */
+.phone-frame { width: 390px; border-radius: 52px; background: #1a1a1a; padding: 14px; box-shadow: 0 32px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08); flex-shrink: 0; }
+.phone-screen { border-radius: 40px; overflow: hidden; height: 844px; position: relative; background: var(--bg); }
+.phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 126px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; z-index: 20; }
+
+/* ── DESKTOP FRAME ── */
+.desktop-frame { width: 100%; max-width: 1100px; background: #2a2a2a; border-radius: 16px 16px 0 0; padding: 36px 12px 0; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+.desktop-bar { display: flex; align-items: center; gap: 8px; padding: 0 0 10px; }
+.desktop-dot { width: 12px; height: 12px; border-radius: 50%; }
+.desktop-screen { border-radius: 8px 8px 0 0; overflow: hidden; height: 700px; background: var(--bg); position: relative; }
+
+/* ── APP SHELL ── */
+.app { height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+.status-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px 8px; position: relative; z-index: 10; }
+.status-time { font-size: 15px; font-weight: 700; color: var(--ink); }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+
+.scroll-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0 100px; -webkit-overflow-scrolling: touch; }
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; height: 82px; background: rgba(255,255,255,.88); backdrop-filter: blur(24px) saturate(180%); border-top: 1px solid rgba(0,0,0,.06); display: flex; align-items: center; justify-content: space-around; padding: 0 8px 16px; z-index: 100; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: var(--r-md); }
+.nav-item.active { background: var(--primary-light); }
+.nav-item.active svg { color: var(--primary); }
+.nav-item.active .nav-label { color: var(--primary); }
+.nav-icon { width: 22px; height: 22px; color: var(--ink-3); }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+
+.notif-badge { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); border: 1.5px solid var(--bg); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); position: relative; }
+
+/* ── SECTION HEADER ── */
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px; }
+.section-title { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.section-link { font-size: 13px; font-weight: 600; color: var(--primary); }
+
+/* ── TOPBAR ── */
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px 12px; }
+.greeting-sub { font-size: 12px; font-weight: 600; color: var(--primary); letter-spacing: .02em; }
+.greeting-name { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; margin-top: 1px; }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+
+/* ── SCREEN TOPBAR (back nav) ── */
+.screen-topbar { display: flex; align-items: center; gap: 12px; padding: 52px 20px 16px; }
+.back-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); flex-shrink: 0; color: var(--ink); }
+.screen-title { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+
+/* ── CHIPS ── */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: var(--r-pill); font-size: 12px; font-weight: 700; }
+.chip.teal   { background: var(--primary-light); color: var(--primary); }
+.chip.green  { background: var(--emerald-soft); color: var(--emerald); }
+.chip.gold   { background: var(--gold-soft); color: var(--gold); }
+.chip.red    { background: var(--red-soft); color: var(--red); }
+
+/* ── STATUS PILL ── */
+.status-pill { padding: 5px 12px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
+.status-pill.paid    { background: rgba(0,168,124,.25); color: #5DFFC8; }
+.status-pill.pending { background: rgba(232,160,32,.22); color: #FFD166; }
+.status-pill.alert   { background: rgba(232,69,60,.22); color: #FF8080; }
+
+/* ────────────────────────────────────────────
+   1. AUTH SCREENS
+──────────────────────────────────────────── */
+
+.auth-bg {
+  height: 100%;
+  background: linear-gradient(170deg, #0D6E5A 0%, #052820 55%, #0a1a12 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.auth-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 18px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 18px);
+  pointer-events: none;
+}
+.auth-header {
+  padding: 60px 32px 32px;
+  position: relative; z-index: 1;
+}
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.auth-logo-mark {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: #fff;
+  backdrop-filter: blur(8px);
+}
+.auth-logo-text { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
+.auth-logo-cite { font-size: 12px; color: rgba(255,255,255,.55); font-weight: 500; }
+.auth-headline { font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -.8px; line-height: 1.1; margin-bottom: 8px; }
+.auth-sub { font-size: 14px; color: rgba(255,255,255,.6); font-weight: 500; line-height: 1.5; }
+
+.auth-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  padding: 32px 24px 40px;
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--ink-2); letter-spacing: .02em; }
+.form-input {
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+}
+.form-input.focused { border-color: var(--primary); background: #fff; }
+.form-input.error   { border-color: var(--red); background: var(--red-soft); }
+.form-input-wrap {
+  position: relative;
+}
+.form-input-icon {
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+}
+.form-error { font-size: 12px; color: var(--red); font-weight: 600; }
+.form-hint  { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+
+.form-lock-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+}
+.form-lock-value { font-size: 15px; color: var(--ink-3); font-weight: 500; flex: 1; }
+.form-lock-icon  { color: var(--ink-3); }
+
+.btn-auth-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  box-shadow: 0 4px 20px rgba(13,110,90,.3);
+  margin-top: 4px;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.auth-link-row {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.auth-link { color: var(--primary); font-weight: 700; }
+
+.pwd-rules {
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pwd-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pwd-rule.ok   { color: var(--emerald); }
+.pwd-rule.fail { color: var(--ink-3); }
+.pwd-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pwd-rule.ok .pwd-dot   { background: var(--emerald); }
+.pwd-rule.fail .pwd-dot { background: var(--ink-3); }
+
+
+/* ────────────────────────────────────────────
+   2. CHEF SÉCURITÉ — DASHBOARD TEMPS RÉEL
+──────────────────────────────────────────── */
+
+.secu-topbar {
+  background: #0F1E2D;
+  padding: 52px 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.secu-title { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
+.secu-sub   { font-size: 12px; color: rgba(255,255,255,.5); font-weight: 500; margin-top: 2px; }
+.secu-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(232,69,60,.2);
+  border: 1px solid rgba(232,69,60,.35);
+}
+.secu-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+.secu-live-dot.pulse { animation: secupulse 1.2s ease-in-out infinite; }
+@keyframes secupulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.secu-live-text { font-size: 11px; font-weight: 700; color: #FF8080; letter-spacing: .04em; }
+
+.secu-stats {
+  background: #0F1E2D;
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.secu-stat {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--r-md);
+  padding: 12px;
+  text-align: center;
+}
+.secu-stat-val  { font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+.secu-stat-lab  { font-size: 10px; color: rgba(255,255,255,.45); font-weight: 600; margin-top: 2px; }
+
+.alert-feed { display: flex; flex-direction: column; gap: 0; padding: 0 16px; }
+
+.alert-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border-left: 4px solid transparent;
+}
+.alert-card.critical { border-left-color: var(--red); }
+.alert-card.warning  { border-left-color: var(--gold); }
+.alert-card.resolved { border-left-color: var(--emerald); }
+
+.alert-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 10px;
+}
+.alert-card-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.alert-card-icon.red   { background: var(--red-soft); color: var(--red); }
+.alert-card-icon.gold  { background: var(--gold-soft); color: var(--gold); }
+.alert-card-icon.green { background: var(--emerald-soft); color: var(--emerald); }
+
+.alert-card-body { flex: 1; min-width: 0; }
+.alert-card-title { font-size: 14px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; margin-bottom: 2px; }
+.alert-card-villa { font-size: 12px; color: var(--ink-3); font-weight: 600; margin-bottom: 4px; }
+.alert-card-desc  { font-size: 12px; color: var(--ink-2); font-weight: 500; line-height: 1.4; }
+.alert-card-meta  { font-size: 11px; color: var(--ink-3); font-weight: 600; }
+
+.alert-card-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  background: var(--red-soft);
+  font-size: 11px; font-weight: 800; color: var(--red);
+  flex-shrink: 0;
+}
+.alert-card-timer.ok { background: var(--emerald-soft); color: var(--emerald); }
+
+.escalade-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--red-soft);
+  border-top: 1px solid rgba(232,69,60,.15);
+}
+.escalade-icon { color: var(--red); }
+.escalade-text { font-size: 11px; font-weight: 700; color: var(--red); }
+
+.alert-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+.alert-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+.alert-btn.primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(13,110,90,.25); }
+.alert-btn.ghost   { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); }
+.alert-btn.red     { background: var(--red); color: #fff; }
+
+.secu-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: #0F1E2D;
+  border-top: 1px solid rgba(255,255,255,.08);
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px 16px;
+  z-index: 100;
+}
+.secu-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; border-radius: var(--r-md); }
+.secu-nav-item.active { background: rgba(255,255,255,.1); }
+.secu-nav-item svg { color: rgba(255,255,255,.4); }
+.secu-nav-item.active svg { color: #fff; }
+.secu-nav-label { font-size: 10px; color: rgba(255,255,255,.4); font-weight: 600; }
+.secu-nav-item.active .secu-nav-label { color: #fff; }
+
+
+/* ────────────────────────────────────────────
+   3. VIE DU QUARTIER — INCIDENTS + CONFLITS
+──────────────────────────────────────────── */
+
+.pill-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.pill-tabs::-webkit-scrollbar { display: none; }
+.pill-tab {
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--surface);
+  color: var(--ink-3);
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+.pill-tab.active { background: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
+
+.incident-card {
+  margin: 0 16px 10px;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+.incident-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.incident-cat-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.incident-cat-icon.elec  { background: var(--gold-soft); color: var(--gold); }
+.incident-cat-icon.water { background: #EAF4FD; color: #2196F3; }
+.incident-cat-icon.clean { background: var(--emerald-soft); color: var(--emerald); }
+.incident-cat-icon.park  { background: #EDE8FD; color: #7C3AED; }
+
+.incident-cat-label { font-size: 10px; font-weight: 700; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
+.incident-card-title { font-size: 14px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; }
+.incident-card-time  { font-size: 11px; font-weight: 500; color: var(--ink-3); margin-left: auto; white-space: nowrap; }
+
+.incident-desc { font-size: 13px; color: var(--ink-2); font-weight: 500; line-height: 1.45; margin-bottom: 12px; }
+.incident-footer { display: flex; align-items: center; gap: 8px; }
+.incident-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.mini-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--emerald));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff;
+}
+.incident-author-name { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.incident-actions { display: flex; align-items: center; gap: 8px; }
+.inc-action { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink-3); }
+.inc-action.liked { color: var(--red); }
+
+.fab-add {
+  position: absolute;
+  bottom: 92px; right: 20px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: var(--shadow-float);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+}
+
+.conflict-card {
+  margin: 0 16px 10px;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.conflict-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+}
+.conflict-card-title { font-size: 14px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; }
+.conflict-status {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+}
+.conflict-status.mediation { background: var(--gold-soft); color: var(--gold); }
+.conflict-status.resolved  { background: var(--emerald-soft); color: var(--emerald); }
+.conflict-status.filed     { background: var(--primary-light); color: var(--primary); }
+
+.conflict-meta { padding: 0 16px 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+.conflict-meta-item { font-size: 11px; color: var(--ink-3); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.conflict-desc { padding: 0 16px 14px; font-size: 13px; color: var(--ink-2); font-weight: 500; line-height: 1.45; }
+.conflict-progress {
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-step { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; }
+.progress-step.done { color: var(--primary); }
+.progress-step.active { color: var(--gold); }
+.progress-step.future { color: var(--ink-3); }
+.progress-line { flex: 1; height: 1px; background: var(--border); }
+.progress-line.done { background: var(--primary); }
+
+
+/* ────────────────────────────────────────────
+   4. MESSAGERIE — CHAT PRIVÉ + GROUPE
+──────────────────────────────────────────── */
+
+.chat-topbar {
+  padding: 52px 16px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chat-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--emerald));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.chat-contact-name { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; }
+.chat-contact-status { font-size: 12px; color: var(--emerald); font-weight: 600; }
+.chat-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg);
+}
+.chat-messages::-webkit-scrollbar { display: none; }
+
+.day-separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.day-separator::before, .day-separator::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.msg-row { display: flex; flex-direction: column; }
+.msg-row.me { align-items: flex-end; }
+.msg-row.them { align-items: flex-start; }
+
+.msg-bubble {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  position: relative;
+}
+.msg-row.me .msg-bubble {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 18px 18px 4px 18px;
+}
+.msg-row.them .msg-bubble {
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: var(--shadow-card);
+}
+.msg-time {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-top: 3px;
+  padding: 0 4px;
+}
+.msg-status { font-size: 10px; color: var(--emerald); margin-top: 3px; font-weight: 600; }
+
+.msg-photo {
+  max-width: 78%;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--border);
+  height: 140px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-3);
+}
+
+.chat-input-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px 36px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-input {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+}
+.chat-input::placeholder { color: var(--ink-3); }
+.chat-send-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(13,110,90,.3);
+  flex-shrink: 0;
+}
+
+.group-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--primary-light);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.msg-row.system { align-items: center; }
+.msg-system {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+
+/* ────────────────────────────────────────────
+   5. CONSOLE ADMIN — DESKTOP
+──────────────────────────────────────────── */
+
+.desktop-app { height: 100%; display: grid; grid-template-columns: 240px 1fr; background: var(--bg); }
+
+.desktop-sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; gap: 2px; overflow-y: auto; }
+.desktop-sidebar::-webkit-scrollbar { width: 0; }
+
+.desktop-logo { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; }
+.desktop-logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.desktop-logo-text { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.desktop-logo-cite { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+
+.sidebar-group-label { font-size: 10px; font-weight: 700; color: var(--ink-3); letter-spacing: .1em; padding: 12px 10px 4px; text-transform: uppercase; }
+.desktop-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600; color: var(--ink-3); cursor: pointer; }
+.desktop-nav-item.active { background: var(--primary-light); color: var(--primary); }
+.desktop-nav-item .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: var(--r-pill); min-width: 18px; text-align: center; }
+.desktop-nav-item .nav-badge.gold { background: var(--gold); color: var(--ink); }
+
+.desktop-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+.desktop-user { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--r-sm); }
+.desktop-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.desktop-user-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+.desktop-user-role { font-size: 10px; font-weight: 500; color: var(--ink-3); }
+
+.desktop-main { display: flex; flex-direction: column; overflow: hidden; }
+.desktop-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.desktop-page-title { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; }
+.desktop-page-sub { font-size: 12px; color: var(--ink-3); font-weight: 500; margin-top: 2px; }
+.desktop-header-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn-primary { display: flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--r-sm); background: var(--primary); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 8px rgba(13,110,90,.25); }
+.btn-secondary { display: flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink-2); font-size: 13px; font-weight: 600; border: 1px solid var(--border); }
+.btn-danger { display: flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--r-sm); background: var(--red-soft); color: var(--red); font-size: 13px; font-weight: 600; border: 1px solid rgba(232,69,60,.2); }
+
+.desktop-body { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.desktop-body::-webkit-scrollbar { width: 0; }
+
+.admin-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.admin-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+.panel { background: var(--surface); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow-card); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.panel-title { font-size: 14px; font-weight: 800; color: var(--ink); }
+
+.user-row { display: grid; grid-template-columns: 1.5fr 90px 80px 90px 60px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.user-row:last-child { border-bottom: none; }
+.user-row-head { background: var(--surface-2); font-weight: 700; color: var(--ink-3); font-size: 10px; letter-spacing: .05em; }
+.user-name-cell { display: flex; align-items: center; gap: 10px; }
+.user-mini-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+.user-mini-av.teal  { background: var(--primary-light); color: var(--primary); }
+.user-mini-av.green { background: var(--emerald-soft); color: var(--emerald); }
+.user-mini-av.gold  { background: var(--gold-soft); color: var(--gold); }
+.user-mini-av.red   { background: var(--red-soft); color: var(--red); }
+.user-full-name { font-weight: 700; color: var(--ink); font-size: 13px; }
+.user-villa { font-size: 10px; color: var(--ink-3); }
+
+.role-tag { display: inline-flex; padding: 3px 8px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; }
+.role-tag.syndic  { background: var(--primary-light); color: var(--primary); }
+.role-tag.secu    { background: var(--gold-soft); color: var(--gold); }
+.role-tag.habitant{ background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--border); }
+.role-tag.admin   { background: #EDE8FD; color: #7C3AED; }
+
+.status-dot { width: 7px; height: 7px; border-radius: 50%; }
+.status-dot.active   { background: var(--emerald); }
+.status-dot.inactive { background: var(--ink-3); }
+
+.row-actions { display: flex; gap: 6px; }
+.row-action-btn { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--ink-3); border: 1px solid var(--border); }
+
+/* Config panel */
+.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px; }
+.config-field { display: flex; flex-direction: column; gap: 6px; }
+.config-label { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: .03em; }
+.config-input { padding: 10px 14px; border-radius: var(--r-sm); border: 1.5px solid var(--border); background: var(--surface-2); font-family: var(--font); font-size: 13px; color: var(--ink); outline: none; }
+.config-input.secret { font-family: monospace; letter-spacing: .1em; color: var(--ink-3); }
+.config-lock { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: var(--r-sm); border: 1.5px solid var(--border); background: var(--surface-2); }
+.config-lock-val { font-size: 13px; color: var(--ink-2); flex: 1; }
+
+/* Modal overlay */
+.modal-overlay { position: absolute; inset: 0; background: rgba(13,27,54,.5); z-index: 400; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--surface); border-radius: var(--r-lg); padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
+.modal-title { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 4px; letter-spacing: -.3px; }
+.modal-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 20px; font-weight: 500; }
+.modal-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* Stat mini cards */
+.stat-mini { background: var(--surface); border-radius: var(--r-md); padding: 16px 18px; box-shadow: var(--shadow-card); }
+.stat-mini-label { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 4px; }
+.stat-mini-val   { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; }
+.stat-mini-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.stat-mini-delta.up   { color: var(--emerald); }
+.stat-mini-delta.gold { color: var(--gold); }
+
+
+/* ────────────────────────────────────────────
+   6. SUPER ADMIN — MULTI-CITÉS
+──────────────────────────────────────────── */
+
+.superadmin-app { height: 100%; display: grid; grid-template-columns: 240px 1fr; background: var(--bg); }
+
+.sa-sidebar { background: #0F1E2D; border-right: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; padding: 24px 16px; gap: 2px; }
+.sa-logo { display: flex; align-items: center; gap: 10px; padding: 0 8px 28px; }
+.sa-logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+.sa-logo-text { font-size: 16px; font-weight: 800; color: #fff; }
+.sa-logo-role  { font-size: 10px; color: rgba(255,255,255,.4); font-weight: 600; }
+.sa-group-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.3); letter-spacing: .1em; padding: 12px 10px 4px; text-transform: uppercase; }
+.sa-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600; color: rgba(255,255,255,.45); }
+.sa-nav-item.active { background: rgba(255,255,255,.1); color: #fff; }
+.sa-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.08); }
+.sa-user { display: flex; align-items: center; gap: 10px; padding: 10px; }
+.sa-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; }
+.sa-user-name { font-size: 12px; font-weight: 700; color: #fff; }
+.sa-user-role { font-size: 10px; color: rgba(255,255,255,.4); }
+
+.sa-main { display: flex; flex-direction: column; overflow: hidden; }
+.sa-header { padding: 20px 28px 16px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; }
+.sa-header-title { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; }
+.sa-header-sub { font-size: 12px; color: var(--ink-3); font-weight: 500; margin-top: 2px; }
+
+.sa-body { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.sa-body::-webkit-scrollbar { width: 0; }
+
+.sa-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.sa-kpi { background: var(--surface); border-radius: var(--r-md); padding: 18px; box-shadow: var(--shadow-card); }
+.sa-kpi-label { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 6px; }
+.sa-kpi-val   { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -.6px; }
+.sa-kpi-delta { font-size: 11px; font-weight: 600; margin-top: 4px; color: var(--emerald); }
+
+.cite-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.cite-card { background: var(--surface); border-radius: var(--r-md); padding: 18px; box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
+.cite-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.cite-card.active::before { background: linear-gradient(90deg, var(--primary), var(--emerald)); }
+.cite-card.new::before    { background: linear-gradient(90deg, var(--gold), #f0a020); }
+.cite-card.inactive::before { background: var(--border); }
+
+.cite-name  { font-size: 15px; font-weight: 800; color: var(--ink); letter-spacing: -.2px; margin-bottom: 4px; }
+.cite-ville { font-size: 11px; color: var(--ink-3); font-weight: 600; margin-bottom: 14px; }
+.cite-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.cite-stat-mini { }
+.cite-stat-val { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.cite-stat-lab { font-size: 10px; color: var(--ink-3); font-weight: 600; }
+.cite-footer { display: flex; align-items: center; justify-content: space-between; }
+.cite-rate-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: var(--r-pill); overflow: hidden; margin: 0 10px; }
+.cite-rate-fill { height: 100%; border-radius: var(--r-pill); }
+.cite-rate-fill.high { background: linear-gradient(90deg, var(--emerald), var(--primary)); }
+.cite-rate-fill.mid  { background: var(--gold); }
+.cite-rate-text { font-size: 11px; font-weight: 800; color: var(--primary); }
+.cite-status-tag { padding: 3px 8px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; }
+.cite-status-tag.active   { background: var(--emerald-soft); color: var(--emerald); }
+.cite-status-tag.new      { background: var(--gold-soft); color: var(--gold); }
+.cite-status-tag.inactive { background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--border); }
+
+@media (max-width: 900px) { .phone-frame { width: 340px; } .phone-screen { height: 720px; } .desktop-frame { display: none; } }
+@media (max-width: 600px) { .viewer { padding: 24px 12px 40px; gap: 40px; } .phone-frame { width: 100%; max-width: 360px; } }
+</style>
+</head>
+<body>
+<div class="viewer">
+
+  <!-- ══════════════════════════════════════
+       1. AUTHENTIFICATION
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Écrans d'authentification</div>
+    <div class="viewer-title">Connexion & Onboarding</div>
+    <div class="viewer-sub">Connexion habitant · Changement de mot de passe obligatoire (comptes créés par admin) · Inscription libre</div>
+    <div class="devices-row">
+
+      <!-- LOGIN -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="auth-bg">
+            <div class="auth-header">
+              <div class="auth-logo">
+                <div class="auth-logo-mark">MS</div>
+                <div>
+                  <div class="auth-logo-text">MySyndic</div>
+                  <div class="auth-logo-cite">Synacassy 1 · Abidjan</div>
+                </div>
+              </div>
+              <div class="auth-headline">Bon retour dans<br>votre cité 👋</div>
+              <div class="auth-sub">Connectez-vous pour accéder à votre espace et gérer votre cotisation.</div>
+            </div>
+            <div class="auth-card">
+              <div class="form-field">
+                <div class="form-label">Adresse email</div>
+                <div class="form-input-wrap">
+                  <div class="form-input" style="color:var(--ink)">kofi.mensah@email.com</div>
+                </div>
+              </div>
+              <div class="form-field">
+                <div class="form-label">Mot de passe</div>
+                <div class="form-input-wrap">
+                  <div class="form-input focused">••••••••••</div>
+                  <div class="form-input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div style="text-align:right;margin-top:-8px">
+                <span style="font-size:13px;font-weight:700;color:var(--primary)">Mot de passe oublié ?</span>
+              </div>
+              <button class="btn-auth-primary">Se connecter</button>
+              <div class="auth-divider">ou</div>
+              <div class="auth-link-row">
+                Pas encore de compte ? <span class="auth-link">Créer un compte</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUST CHANGE PASSWORD -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="auth-bg">
+            <div class="auth-header">
+              <div class="auth-logo">
+                <div class="auth-logo-mark">MS</div>
+                <div>
+                  <div class="auth-logo-text">MySyndic</div>
+                  <div class="auth-logo-cite">Synacassy 1 · Abidjan</div>
+                </div>
+              </div>
+              <div class="auth-headline">Créez votre<br>mot de passe 🔐</div>
+              <div class="auth-sub">Votre compte a été créé par l'administrateur. Définissez un mot de passe personnel pour continuer.</div>
+            </div>
+            <div class="auth-card">
+              <div style="background:var(--primary-light);border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div style="font-size:12px;font-weight:600;color:var(--primary)">Mot de passe temporaire utilisé. Créez le vôtre pour accéder à l'application.</div>
+              </div>
+              <div class="form-field">
+                <div class="form-label">Nouveau mot de passe</div>
+                <div class="form-input focused">••••••••••</div>
+              </div>
+              <div class="pwd-rules">
+                <div class="pwd-rule ok"><div class="pwd-dot"></div>8 caractères minimum</div>
+                <div class="pwd-rule ok"><div class="pwd-dot"></div>Une lettre majuscule</div>
+                <div class="pwd-rule fail"><div class="pwd-dot"></div>Un chiffre</div>
+              </div>
+              <div class="form-field">
+                <div class="form-label">Confirmer le mot de passe</div>
+                <div class="form-input">••••••••</div>
+                <div class="form-error">Les mots de passe ne correspondent pas</div>
+              </div>
+              <button class="btn-auth-primary">Valider et accéder</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSCRIPTION HABITANT -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="auth-bg">
+            <div class="auth-header">
+              <div class="auth-logo">
+                <div class="auth-logo-mark">MS</div>
+                <div>
+                  <div class="auth-logo-text">MySyndic</div>
+                  <div class="auth-logo-cite">Synacassy 1 · Abidjan</div>
+                </div>
+              </div>
+              <div class="auth-headline">Rejoignez<br>Synacassy 1 🏘️</div>
+              <div class="auth-sub">Créez votre compte habitant pour payer vos cotisations et rester connecté à votre cité.</div>
+            </div>
+            <div class="auth-card" style="gap:12px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="form-field">
+                  <div class="form-label">Prénom</div>
+                  <div class="form-input" style="color:var(--ink)">Kofi</div>
+                </div>
+                <div class="form-field">
+                  <div class="form-label">Nom</div>
+                  <div class="form-input" style="color:var(--ink)">Mensah</div>
+                </div>
+              </div>
+              <div class="form-field">
+                <div class="form-label">Email</div>
+                <div class="form-input" style="color:var(--ink)">kofi@email.com</div>
+              </div>
+              <div class="form-field">
+                <div class="form-label">Téléphone</div>
+                <div class="form-input" style="color:var(--ink)">+225 07 12 34 56</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="form-field">
+                  <div class="form-label">N° Villa</div>
+                  <div class="form-input" style="color:var(--ink)">14</div>
+                </div>
+                <div class="form-field">
+                  <div class="form-label">Rue</div>
+                  <div class="form-input" style="color:var(--ink)">des Palmiers</div>
+                </div>
+              </div>
+              <div style="background:var(--gold-soft);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div style="font-size:11px;font-weight:600;color:var(--gold)">Villa et rue verrouillées après inscription. Seul le syndic peut les modifier.</div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <div style="width:20px;height:20px;border-radius:6px;border:2px solid var(--primary);background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style="font-size:12px;color:var(--ink-3);font-weight:500;line-height:1.5">J'accepte les <span style="color:var(--primary);font-weight:700">Conditions générales</span> et la politique de confidentialité</div>
+              </div>
+              <button class="btn-auth-primary" style="margin-top:4px">Créer mon compte</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       2. CHEF DE SÉCURITÉ
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Espace Chef de Sécurité</div>
+    <div class="viewer-title">Flux d'alertes temps réel</div>
+    <div class="viewer-sub">Interface sombre pour la vigilance nocturne · Indicateur d'escalade (>3 min) · Actions rapides par alerte</div>
+    <div class="devices-row">
+
+      <!-- DASHBOARD ALERTES -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app" style="background:#0B1721">
+            <div class="secu-topbar">
+              <div>
+                <div class="secu-title">Sécurité</div>
+                <div class="secu-sub">Synacassy 1 · Agent: Moussa K.</div>
+              </div>
+              <div class="secu-live">
+                <div class="secu-live-dot pulse"></div>
+                <div class="secu-live-text">EN DIRECT</div>
+              </div>
+            </div>
+            <div class="secu-stats">
+              <div class="secu-stat">
+                <div class="secu-stat-val" style="color:#FF8080">2</div>
+                <div class="secu-stat-lab">ACTIVES</div>
+              </div>
+              <div class="secu-stat">
+                <div class="secu-stat-val">4</div>
+                <div class="secu-stat-lab">CE MOIS</div>
+              </div>
+              <div class="secu-stat">
+                <div class="secu-stat-val" style="color:#5DFFC8">3 min</div>
+                <div class="secu-stat-lab">RÉP. MOY.</div>
+              </div>
+            </div>
+
+            <div class="scroll-content" style="padding:12px 0 100px">
+
+              <div style="padding:0 16px 8px;display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:13px;font-weight:800;color:#fff">Alertes actives</div>
+                <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">Triées par urgence</div>
+              </div>
+
+              <!-- ALERTE 1: CRITIQUE + ESCALADE -->
+              <div class="alert-feed">
+                <div class="alert-card critical">
+                  <div class="escalade-banner">
+                    <div class="escalade-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="escalade-text">ESCALADÉE — Sans réponse depuis 5 min · Syndic notifié</div>
+                  </div>
+                  <div class="alert-card-top">
+                    <div class="alert-card-icon red">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="alert-card-body">
+                      <div class="alert-card-title">Intrusion / Agression</div>
+                      <div class="alert-card-villa">Villa 31 · Rue des Bananiers</div>
+                      <div class="alert-card-desc">Individu suspect aperçu dans le jardin, tente de forcer la fenêtre</div>
+                    </div>
+                    <div class="alert-card-timer">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      5:12
+                    </div>
+                  </div>
+                  <div class="alert-card-actions">
+                    <div class="alert-btn red">Agent en route</div>
+                    <div class="alert-btn ghost">Détails</div>
+                  </div>
+                </div>
+
+                <!-- ALERTE 2: EN COURS -->
+                <div class="alert-card warning">
+                  <div class="alert-card-top">
+                    <div class="alert-card-icon gold">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="alert-card-body">
+                      <div class="alert-card-title">Malaise médical</div>
+                      <div class="alert-card-villa">Villa 8 · Rue des Manguiers</div>
+                      <div class="alert-card-desc">Personne âgée, perte de connaissance, famille présente</div>
+                    </div>
+                    <div class="alert-card-timer ok">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      2:04
+                    </div>
+                  </div>
+                  <div style="padding:0 14px 10px;display:flex;align-items:center;gap:6px">
+                    <div style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></div>
+                    <div style="font-size:11px;font-weight:700;color:var(--gold)">Agent en route</div>
+                  </div>
+                  <div class="alert-card-actions">
+                    <div class="alert-btn primary">Sur place</div>
+                    <div class="alert-btn ghost">Détails</div>
+                  </div>
+                </div>
+
+                <!-- ALERTE 3: SILENCIEUSE -->
+                <div class="alert-card critical" style="border-left-color:#7C3AED">
+                  <div class="alert-card-top">
+                    <div class="alert-card-icon" style="background:#EDE8FD;color:#7C3AED">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    </div>
+                    <div class="alert-card-body">
+                      <div class="alert-card-title">Alerte silencieuse 🔇</div>
+                      <div class="alert-card-villa">Villa 19 · Rue des Cocotiers</div>
+                      <div class="alert-card-desc">Envoyée sans formulaire · Motif non précisé</div>
+                    </div>
+                    <div class="alert-card-timer">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      0:47
+                    </div>
+                  </div>
+                  <div class="alert-card-actions">
+                    <div class="alert-btn red">Intervenir</div>
+                    <div class="alert-btn ghost">Contacter</div>
+                  </div>
+                </div>
+
+                <!-- RÉSOLUE -->
+                <div style="padding:0 16px 8px">
+                  <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.5)">Résolues aujourd'hui</div>
+                </div>
+                <div class="alert-card resolved">
+                  <div class="alert-card-top">
+                    <div class="alert-card-icon green">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="alert-card-body">
+                      <div class="alert-card-title">Autre urgence · résolue</div>
+                      <div class="alert-card-villa">Villa 5 · 09:22</div>
+                    </div>
+                    <div class="alert-card-timer ok">✓ 3 min</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="secu-nav">
+              <div class="secu-nav-item active">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="secu-nav-label">Alertes</div>
+              </div>
+              <div class="secu-nav-item">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <div class="secu-nav-label">Stats</div>
+              </div>
+              <div class="secu-nav-item">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="secu-nav-label">Profil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       3. VIE DU QUARTIER
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Vie du quartier</div>
+    <div class="viewer-title">Incidents · Annonces · Conflits</div>
+    <div class="viewer-sub">Pill tabs scrollables · Formulaire signalement · Workflow conflit avec étapes visuelles</div>
+    <div class="devices-row">
+
+      <!-- INCIDENTS -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time">9:41</span></div>
+            <div class="topbar">
+              <div>
+                <div class="greeting-sub">Vie du quartier</div>
+                <div class="greeting-name">Synacassy 1</div>
+              </div>
+              <div class="topbar-right">
+                <div class="icon-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="pill-tabs">
+              <div class="pill-tab active">Incidents</div>
+              <div class="pill-tab">Annonces</div>
+              <div class="pill-tab">Mes conflits</div>
+            </div>
+            <div class="scroll-content" style="padding:12px 0 100px">
+              <div class="incident-card">
+                <div class="incident-card-top">
+                  <div class="incident-cat-icon elec">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div class="incident-cat-label">Électricité</div>
+                    <div class="incident-card-title">Panne éclairage allée B</div>
+                  </div>
+                  <div class="incident-card-time">il y a 2h</div>
+                </div>
+                <div class="incident-desc">L'éclairage public de toute l'allée B est éteint depuis ce matin. Difficile de circuler le soir en sécurité.</div>
+                <div class="incident-footer">
+                  <div class="incident-author">
+                    <div class="mini-avatar">KM</div>
+                    <div class="incident-author-name">Kofi M. · Villa 14</div>
+                  </div>
+                  <div class="incident-actions">
+                    <div class="inc-action liked">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8453C" stroke="#E8453C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      4
+                    </div>
+                    <div class="inc-action">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      2
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="incident-card">
+                <div class="incident-card-top">
+                  <div class="incident-cat-icon water">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div class="incident-cat-label">Eau</div>
+                    <div class="incident-card-title">Fuite canalisation principale</div>
+                  </div>
+                  <div class="incident-card-time">hier</div>
+                </div>
+                <div class="incident-desc">Une fuite importante au carrefour rue des Manguiers / allée A. La chaussée est déjà inondée.</div>
+                <div class="incident-footer">
+                  <div class="incident-author">
+                    <div class="mini-avatar" style="background:linear-gradient(135deg,#2196F3,#00BCD4)">AB</div>
+                    <div class="incident-author-name">Ama B. · Villa 7</div>
+                  </div>
+                  <div class="incident-actions">
+                    <div class="inc-action">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      7
+                    </div>
+                    <div class="inc-action">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      5
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="incident-card">
+                <div class="incident-card-top">
+                  <div class="incident-cat-icon park">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div class="incident-cat-label">Stationnement</div>
+                    <div class="incident-card-title">Véhicule bloque l'accès pompiers</div>
+                  </div>
+                  <div class="incident-card-time">il y a 3j</div>
+                </div>
+                <div class="incident-desc">Un véhicule sans plaque stationné devant le portail de secours depuis 3 jours.</div>
+                <div class="incident-footer">
+                  <div class="incident-author">
+                    <div class="mini-avatar" style="background:linear-gradient(135deg,#7C3AED,#9F67E8)">YK</div>
+                    <div class="incident-author-name">Yao K. · Villa 22</div>
+                  </div>
+                  <div class="incident-actions">
+                    <div class="inc-action liked">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8453C" stroke="#E8453C" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      12
+                    </div>
+                    <div class="inc-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>3</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fab-add">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nav-label">Accueil</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="nav-label">Cotisation</div></div>
+              <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="nav-label">Quartier</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nav-label">Messages</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="nav-label">Profil</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFLITS -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time">9:41</span></div>
+            <div class="topbar">
+              <div><div class="greeting-sub">Vie du quartier</div><div class="greeting-name">Mes conflits</div></div>
+            </div>
+            <div class="pill-tabs">
+              <div class="pill-tab">Incidents</div>
+              <div class="pill-tab">Annonces</div>
+              <div class="pill-tab active">Mes conflits</div>
+            </div>
+            <div class="scroll-content" style="padding:12px 0 100px">
+              <div class="conflict-card">
+                <div class="conflict-card-head">
+                  <div class="conflict-card-title">Bruit nocturne répété</div>
+                  <div class="conflict-status mediation">En médiation</div>
+                </div>
+                <div class="conflict-meta">
+                  <div class="conflict-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Villa 15</div>
+                  <div class="conflict-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>26 août 2026</div>
+                  <div class="conflict-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Bruit</div>
+                </div>
+                <div class="conflict-desc">Musique très forte et fêtes jusqu'à 3h du matin tous les week-ends. La situation dure depuis 3 semaines.</div>
+                <div class="conflict-progress">
+                  <div class="progress-step done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Signalé
+                  </div>
+                  <div class="progress-line done"></div>
+                  <div class="progress-step active">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+                    Médiation
+                  </div>
+                  <div class="progress-line"></div>
+                  <div class="progress-step future">
+                    <div style="width:10px;height:10px;border-radius:50%;border:2px solid var(--ink-3)"></div>
+                    Résolu
+                  </div>
+                </div>
+              </div>
+              <div class="conflict-card">
+                <div class="conflict-card-head">
+                  <div class="conflict-card-title">Stationnement zone commune</div>
+                  <div class="conflict-status resolved">Résolu</div>
+                </div>
+                <div class="conflict-meta">
+                  <div class="conflict-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Villa 9</div>
+                  <div class="conflict-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>5 août 2026</div>
+                </div>
+                <div class="conflict-desc">Véhicule occupant systématiquement la place commune devant mon garage.</div>
+                <div style="margin:0 16px 12px;padding:10px 12px;background:var(--emerald-soft);border-radius:var(--r-sm)">
+                  <div style="font-size:11px;font-weight:700;color:var(--emerald);margin-bottom:2px">Note de clôture du syndic</div>
+                  <div style="font-size:12px;color:var(--primary-dark);font-weight:500">Le voisin concerné a été informé et s'est engagé à ne plus bloquer l'accès. Affaire classée.</div>
+                </div>
+                <div class="conflict-progress">
+                  <div class="progress-step done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Signalé</div>
+                  <div class="progress-line done"></div>
+                  <div class="progress-step done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Médiation</div>
+                  <div class="progress-line done"></div>
+                  <div class="progress-step done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Résolu</div>
+                </div>
+              </div>
+            </div>
+            <div class="fab-add">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nav-label">Accueil</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="nav-label">Cotisation</div></div>
+              <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="nav-label">Quartier</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nav-label">Messages</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="nav-label">Profil</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       4. MESSAGERIE
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Messagerie</div>
+    <div class="viewer-title">Chat privé & Chat de la cité</div>
+    <div class="viewer-sub">Bulles iOS-style · Séparateurs de jours · Suppression soft · Badge groupe</div>
+    <div class="devices-row">
+
+      <!-- CHAT PRIVÉ SYNDIC -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app" style="background:var(--bg)">
+            <div class="chat-topbar">
+              <div class="back-btn" style="margin-top:0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </div>
+              <div class="chat-avatar">AS</div>
+              <div>
+                <div class="chat-contact-name">Ama Sika</div>
+                <div class="chat-contact-status">● En ligne · Syndic</div>
+              </div>
+              <div class="chat-actions">
+                <div class="icon-btn" style="width:36px;height:36px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8a16 16 0 0 0 6 6l.27-.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="chat-messages">
+              <div class="day-separator">Hier</div>
+              <div class="msg-row them">
+                <div class="msg-bubble">Bonjour Kofi, votre cotisation de juillet est bien reçue. Merci !</div>
+                <div class="msg-time">14:22</div>
+              </div>
+              <div class="msg-row me">
+                <div class="msg-bubble">Merci Ama. Pour le mois d'août, je règle ça par Paystack ce soir.</div>
+                <div class="msg-time">14:35</div>
+                <div class="msg-status">✓✓ Lu</div>
+              </div>
+              <div class="msg-row them">
+                <div class="msg-bubble">Parfait. N'hésitez pas si vous avez des questions. Bonne journée 🙂</div>
+                <div class="msg-time">14:37</div>
+              </div>
+              <div class="day-separator">Aujourd'hui</div>
+              <div class="msg-row me">
+                <div class="msg-bubble">Bonjour, j'ai signalé la panne d'éclairage allée B. C'est déjà en cours ?</div>
+                <div class="msg-time">09:12</div>
+                <div class="msg-status">✓✓ Lu</div>
+              </div>
+              <div class="msg-row them">
+                <div class="msg-bubble">Oui je viens de contacter le prestataire. Ça devrait être réparé aujourd'hui dans l'après-midi.</div>
+                <div class="msg-time">09:28</div>
+              </div>
+              <div class="msg-row me">
+                <div class="msg-bubble">Super merci !</div>
+                <div class="msg-time">09:29</div>
+                <div class="msg-status">✓ Envoyé</div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <div class="icon-btn" style="width:36px;height:36px;box-shadow:none;border:1.5px solid var(--border)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <div class="chat-input" style="color:var(--ink-3)">Message…</div>
+              <div class="chat-send-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT GROUPE -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app" style="background:var(--bg)">
+            <div class="chat-topbar">
+              <div class="back-btn" style="margin-top:0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </div>
+              <div class="chat-avatar" style="background:linear-gradient(135deg,#0D6E5A,#E8A020)">S1</div>
+              <div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div class="chat-contact-name">Chat Synacassy 1</div>
+                  <div class="group-chip">143</div>
+                </div>
+                <div style="font-size:11px;color:var(--ink-3);font-weight:500">Habitants + Syndic</div>
+              </div>
+            </div>
+            <div class="chat-messages">
+              <div class="day-separator">Aujourd'hui</div>
+              <div class="msg-row system">
+                <div class="msg-system">Ama Sika (Syndic) a épinglé une annonce</div>
+              </div>
+              <div class="msg-row them">
+                <div style="display:flex;align-items:flex-end;gap:8px">
+                  <div class="mini-avatar">AS</div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:3px">Ama Sika · Syndic</div>
+                    <div class="msg-bubble">📌 Réunion copropriétaires le 12 septembre à 18h en salle commune. Présence souhaitée pour tous les habitants.</div>
+                  </div>
+                </div>
+                <div class="msg-time" style="margin-left:32px">08:00</div>
+              </div>
+              <div class="msg-row them">
+                <div style="display:flex;align-items:flex-end;gap:8px">
+                  <div class="mini-avatar" style="background:linear-gradient(135deg,#2196F3,#00BCD4)">FD</div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--ink-2);margin-bottom:3px">Fatou Diallo · Villa 3</div>
+                    <div class="msg-bubble">Reçu ! Je serai présente 👍</div>
+                  </div>
+                </div>
+                <div class="msg-time" style="margin-left:32px">08:14</div>
+              </div>
+              <div class="msg-row them">
+                <div style="display:flex;align-items:flex-end;gap:8px">
+                  <div class="mini-avatar" style="background:linear-gradient(135deg,#7C3AED,#9F67E8)">MO</div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--ink-2);margin-bottom:3px">Mamadou O. · Villa 11</div>
+                    <div class="msg-bubble">Est-ce qu'il sera question des cotisations impayées ?</div>
+                  </div>
+                </div>
+                <div class="msg-time" style="margin-left:32px">09:02</div>
+              </div>
+              <div class="msg-row me">
+                <div class="msg-bubble">Oui la panne allée B sera aussi à l'ordre du jour j'espère</div>
+                <div class="msg-time">09:15</div>
+                <div class="msg-status">✓✓ Lu par 12</div>
+              </div>
+              <div class="msg-row them">
+                <div style="display:flex;align-items:flex-end;gap:8px">
+                  <div class="mini-avatar">AS</div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:3px">Ama Sika · Syndic</div>
+                    <div class="msg-bubble">Absolument, l'ordre du jour complet sera partagé demain.</div>
+                  </div>
+                </div>
+                <div class="msg-time" style="margin-left:32px">09:20</div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <div class="icon-btn" style="width:36px;height:36px;box-shadow:none;border:1.5px solid var(--border)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <div class="chat-input" style="color:var(--ink-3)">Message au groupe…</div>
+              <div class="chat-send-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       5. CONSOLE ADMIN — DESKTOP
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Console Administrateur</div>
+    <div class="viewer-title">Gestion des comptes & Configuration</div>
+    <div class="viewer-sub">Desktop 1280px · Création de comptes avec modal · Config Paystack · Vue globale cité</div>
+    <div class="desktop-frame">
+      <div class="desktop-bar">
+        <div class="desktop-dot" style="background:#FF5F57"></div>
+        <div class="desktop-dot" style="background:#FEBC2E"></div>
+        <div class="desktop-dot" style="background:#28C840"></div>
+      </div>
+      <div class="desktop-screen">
+        <div class="desktop-app">
+          <div class="desktop-sidebar">
+            <div class="desktop-logo">
+              <div class="desktop-logo-icon">MS</div>
+              <div><div class="desktop-logo-text">MySyndic</div><div class="desktop-logo-cite">Admin · Synacassy 1</div></div>
+            </div>
+            <div class="sidebar-group-label">Gestion</div>
+            <div class="desktop-nav-item active">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Comptes
+              <span class="nav-badge">2</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M16.24 7.76a6 6 0 0 1 0 8.49M6.34 17.66a6 6 0 0 1 0-8.49M3.51 20.49a10 10 0 0 1 0-14.14"/></svg>
+              Configuration
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Vue globale
+            </div>
+            <div class="desktop-sidebar-footer">
+              <div class="desktop-user"><div class="desktop-avatar">GA</div><div><div class="desktop-user-name">Germain Edi</div><div class="desktop-user-role">Administrateur</div></div></div>
+            </div>
+          </div>
+          <div class="desktop-main">
+            <div class="desktop-header">
+              <div><div class="desktop-page-title">Gestion des comptes</div><div class="desktop-page-sub">Synacassy 1 · 148 comptes actifs</div></div>
+              <div class="desktop-header-actions">
+                <button class="btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Rechercher
+                </button>
+                <button class="btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Créer un compte
+                </button>
+              </div>
+            </div>
+            <div class="desktop-body">
+              <div class="admin-grid-3">
+                <div class="stat-mini"><div class="stat-mini-label">Habitants actifs</div><div class="stat-mini-val">143</div><div class="stat-mini-delta up">↑ +2 ce mois</div></div>
+                <div class="stat-mini"><div class="stat-mini-label">Syndic</div><div class="stat-mini-val">1</div><div class="stat-mini-delta gold">Ama Sika</div></div>
+                <div class="stat-mini"><div class="stat-mini-label">Chefs de sécu.</div><div class="stat-mini-val">2</div><div class="stat-mini-delta up">2 actifs</div></div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Tous les comptes</div>
+                  <div style="display:flex;gap:8px">
+                    <div style="padding:5px 12px;border-radius:var(--r-pill);background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700">Tous</div>
+                    <div style="padding:5px 12px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">Habitants</div>
+                    <div style="padding:5px 12px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">Staff</div>
+                  </div>
+                </div>
+                <div class="user-row user-row-head">
+                  <div>Compte</div><div>Rôle</div><div>Villa</div><div>Statut</div><div>Actions</div>
+                </div>
+                <div class="user-row">
+                  <div class="user-name-cell"><div class="user-mini-av teal">AS</div><div><div class="user-full-name">Ama Sika</div><div class="user-villa">ama.sika@mysyndic.ci</div></div></div>
+                  <div><span class="role-tag syndic">Syndic</span></div>
+                  <div style="font-size:12px;color:var(--ink-2);font-weight:600">—</div>
+                  <div style="display:flex;align-items:center;gap:5px"><div class="status-dot active"></div><span style="font-size:11px;font-weight:600;color:var(--emerald)">Actif</span></div>
+                  <div class="row-actions"><div class="row-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-name-cell"><div class="user-mini-av gold">MK</div><div><div class="user-full-name">Moussa Koné</div><div class="user-villa">m.kone@mysyndic.ci</div></div></div>
+                  <div><span class="role-tag secu">Chef Sécu.</span></div>
+                  <div style="font-size:12px;color:var(--ink-2);font-weight:600">—</div>
+                  <div style="display:flex;align-items:center;gap:5px"><div class="status-dot active"></div><span style="font-size:11px;font-weight:600;color:var(--emerald)">Actif</span></div>
+                  <div class="row-actions"><div class="row-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-name-cell"><div class="user-mini-av teal">KM</div><div><div class="user-full-name">Kofi Mensah</div><div class="user-villa">kofi@email.com</div></div></div>
+                  <div><span class="role-tag habitant">Habitant</span></div>
+                  <div style="font-size:12px;color:var(--ink-2);font-weight:600">Villa 14</div>
+                  <div style="display:flex;align-items:center;gap:5px"><div class="status-dot active"></div><span style="font-size:11px;font-weight:600;color:var(--emerald)">Actif</span></div>
+                  <div class="row-actions"><div class="row-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="row-action-btn" style="color:var(--red)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-name-cell"><div class="user-mini-av red">YK</div><div><div class="user-full-name">Yao Kouassi</div><div class="user-villa">yao.k@email.com</div></div></div>
+                  <div><span class="role-tag habitant">Habitant</span></div>
+                  <div style="font-size:12px;color:var(--ink-2);font-weight:600">Villa 22</div>
+                  <div style="display:flex;align-items:center;gap:5px"><div class="status-dot inactive"></div><span style="font-size:11px;font-weight:600;color:var(--ink-3)">Inactif</span></div>
+                  <div class="row-actions"><div class="row-action-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+                </div>
+              </div>
+
+              <!-- CONFIG SECTION -->
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Configuration de la cité</div>
+                  <button class="btn-primary" style="padding:7px 14px;font-size:12px">Enregistrer</button>
+                </div>
+                <div class="config-grid">
+                  <div class="config-field"><div class="config-label">Nom de la cité</div><div class="config-input">Synacassy 1</div></div>
+                  <div class="config-field"><div class="config-label">Cotisation mensuelle (FCFA)</div><div class="config-input">25 000</div></div>
+                  <div class="config-field"><div class="config-label">Téléphone syndic</div><div class="config-input">+225 07 12 34 56</div></div>
+                  <div class="config-field"><div class="config-label">Téléphone urgence</div><div class="config-input">+225 01 23 45 67</div></div>
+                  <div class="config-field"><div class="config-label">Lien Wave paiement</div><div class="config-input">wave.com/to/synacassy1</div></div>
+                  <div class="config-field"><div class="config-label">Nombre de villas</div><div class="config-input">143</div></div>
+                  <div class="config-field">
+                    <div class="config-label">Clé publique Paystack</div>
+                    <div class="config-input config-secret">pk_live_••••••••••••••••</div>
+                  </div>
+                  <div class="config-field">
+                    <div class="config-label">Clé secrète Paystack</div>
+                    <div class="config-input config-secret">sk_live_••••••••••••••••</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL CRÉATION COMPTE -->
+            <div class="modal-overlay">
+              <div class="modal">
+                <div class="modal-title">Créer un compte staff</div>
+                <div class="modal-sub">Un email avec un mot de passe temporaire sera envoyé automatiquement.</div>
+                <div class="modal-fields">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="config-field"><div class="config-label">Prénom</div><div class="config-input" style="background:#F0F3F0;color:var(--ink)">Boubacar</div></div>
+                    <div class="config-field"><div class="config-label">Nom</div><div class="config-input" style="background:#F0F3F0;color:var(--ink)">Traoré</div></div>
+                  </div>
+                  <div class="config-field"><div class="config-label">Email</div><div class="config-input" style="background:#F0F3F0;color:var(--ink);border-color:var(--primary)">b.traore@mysyndic.ci</div></div>
+                  <div class="config-field"><div class="config-label">Téléphone</div><div class="config-input" style="background:#F0F3F0;color:var(--ink)">+225 05 67 89 01</div></div>
+                  <div class="config-field">
+                    <div class="config-label">Rôle</div>
+                    <div style="display:flex;gap:8px">
+                      <div style="flex:1;padding:10px 14px;border-radius:var(--r-sm);border:2px solid var(--primary);background:var(--primary-light);font-size:13px;font-weight:700;color:var(--primary);text-align:center">Chef de Sécurité</div>
+                      <div style="flex:1;padding:10px 14px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:600;color:var(--ink-3);text-align:center">Syndic</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button class="btn-secondary">Annuler</button>
+                  <button class="btn-primary">Créer le compte</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       6. SUPER ADMIN — MULTI-CITÉS
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Super Admin</div>
+    <div class="viewer-title">Vue multi-cités — Fondateur</div>
+    <div class="viewer-sub">Sidebar sombre · KPIs agrégés · Grille des cités avec taux de recouvrement</div>
+    <div class="desktop-frame">
+      <div class="desktop-bar">
+        <div class="desktop-dot" style="background:#FF5F57"></div>
+        <div class="desktop-dot" style="background:#FEBC2E"></div>
+        <div class="desktop-dot" style="background:#28C840"></div>
+      </div>
+      <div class="desktop-screen">
+        <div class="superadmin-app">
+          <div class="sa-sidebar">
+            <div class="sa-logo">
+              <div class="sa-logo-icon">MS</div>
+              <div><div class="sa-logo-text">MySyndic</div><div class="sa-logo-role">Super Admin · Germain Edi</div></div>
+            </div>
+            <div class="sa-group-label">Plateformes</div>
+            <div class="sa-nav-item active">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Toutes les cités
+            </div>
+            <div class="sa-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Vue globale
+            </div>
+            <div class="sa-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Revenus
+            </div>
+            <div class="sa-sidebar-footer">
+              <div class="sa-user"><div class="sa-avatar">GE</div><div><div class="sa-user-name">Germain Edi</div><div class="sa-user-role">Fondateur · Super Admin</div></div></div>
+            </div>
+          </div>
+          <div class="sa-main">
+            <div class="sa-header">
+              <div><div class="sa-header-title">Toutes les cités</div><div class="sa-header-sub">Vue agrégée · Septembre 2026</div></div>
+              <button class="btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nouvelle cité
+              </button>
+            </div>
+            <div class="sa-body">
+              <div class="sa-kpis">
+                <div class="sa-kpi"><div class="sa-kpi-label">Cités actives</div><div class="sa-kpi-val">3</div><div class="sa-kpi-delta">+1 ce mois</div></div>
+                <div class="sa-kpi"><div class="sa-kpi-label">Habitants totaux</div><div class="sa-kpi-val">412</div><div class="sa-kpi-delta">↑ +18 ce mois</div></div>
+                <div class="sa-kpi"><div class="sa-kpi-label">Revenus sept.</div><div class="sa-kpi-val">7,8M</div><div class="sa-kpi-delta">FCFA collectés</div></div>
+                <div class="sa-kpi"><div class="sa-kpi-label">Taux global</div><div class="sa-kpi-val">71%</div><div class="sa-kpi-delta">Recouvrement</div></div>
+              </div>
+              <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px">Cités déployées</div>
+              <div class="cite-grid">
+                <div class="cite-card active">
+                  <div class="cite-name">Synacassy 1</div>
+                  <div class="cite-ville">Cocody · Abidjan</div>
+                  <div class="cite-stats">
+                    <div class="cite-stat-mini"><div class="cite-stat-val">143</div><div class="cite-stat-lab">Villas</div></div>
+                    <div class="cite-stat-mini"><div class="cite-stat-val">2,65M</div><div class="cite-stat-lab">FCFA/mois</div></div>
+                  </div>
+                  <div class="cite-footer">
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">74%</div>
+                    <div class="cite-rate-bar"><div class="cite-rate-fill high" style="width:74%"></div></div>
+                    <div class="cite-rate-text">74%</div>
+                    <div style="width:8px"></div>
+                    <span class="cite-status-tag active">Actif</span>
+                  </div>
+                </div>
+                <div class="cite-card active">
+                  <div class="cite-name">Résidence Les Orchidées</div>
+                  <div class="cite-ville">Yopougon · Abidjan</div>
+                  <div class="cite-stats">
+                    <div class="cite-stat-mini"><div class="cite-stat-val">189</div><div class="cite-stat-lab">Villas</div></div>
+                    <div class="cite-stat-mini"><div class="cite-stat-val">4,1M</div><div class="cite-stat-lab">FCFA/mois</div></div>
+                  </div>
+                  <div class="cite-footer">
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">68%</div>
+                    <div class="cite-rate-bar"><div class="cite-rate-fill mid" style="width:68%"></div></div>
+                    <div class="cite-rate-text" style="color:var(--gold)">68%</div>
+                    <div style="width:8px"></div>
+                    <span class="cite-status-tag active">Actif</span>
+                  </div>
+                </div>
+                <div class="cite-card new">
+                  <div class="cite-name">Cité Palmier d'Or</div>
+                  <div class="cite-ville">Marcory · Abidjan</div>
+                  <div class="cite-stats">
+                    <div class="cite-stat-mini"><div class="cite-stat-val">80</div><div class="cite-stat-lab">Villas</div></div>
+                    <div class="cite-stat-mini"><div class="cite-stat-val">—</div><div class="cite-stat-lab">En cours</div></div>
+                  </div>
+                  <div class="cite-footer">
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">0%</div>
+                    <div class="cite-rate-bar"><div class="cite-rate-fill mid" style="width:0%"></div></div>
+                    <div class="cite-rate-text" style="color:var(--gold)">Nouveau</div>
+                    <div style="width:8px"></div>
+                    <span class="cite-status-tag new">Déploiement</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

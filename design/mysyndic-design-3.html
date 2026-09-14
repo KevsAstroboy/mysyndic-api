@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySyndic — Design System Part 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #F5F7F4;
+  --surface:      #FFFFFF;
+  --surface-2:    #F0F3F0;
+  --ink:          #0F1E2D;
+  --ink-2:        #3A5068;
+  --ink-3:        #8BA4B8;
+  --border:       #E2EAE7;
+  --primary:      #0D6E5A;
+  --primary-light:#E6F5F1;
+  --primary-dark: #083D31;
+  --gold:         #E8A020;
+  --gold-soft:    #FEF3DC;
+  --emerald:      #00A87C;
+  --emerald-soft: #DDFAF0;
+  --red:          #E8453C;
+  --red-soft:     #FDECEA;
+  --red-glow:     rgba(232,69,60,.38);
+  --shadow-card:  0 1px 4px rgba(13,110,90,.06), 0 4px 16px rgba(13,110,90,.07);
+  --shadow-float: 0 8px 32px rgba(13,110,90,.14);
+  --r-sm: 10px; --r-md: 16px; --r-lg: 20px; --r-xl: 24px; --r-pill: 999px;
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: #E8EDE8; color: var(--ink); }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+.viewer { min-height: 100vh; padding: 40px 24px 80px; display: flex; flex-direction: column; align-items: center; gap: 70px; }
+.viewer-section { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 16px; }
+.viewer-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #6a8a7a; text-transform: uppercase; }
+.viewer-title { font-size: 28px; font-weight: 800; color: #1a2e24; letter-spacing: -.5px; margin-bottom: 4px; }
+.viewer-sub   { font-size: 14px; color: #6a8a7a; font-weight: 500; margin-bottom: 20px; }
+.devices-row  { display: flex; align-items: flex-start; gap: 40px; flex-wrap: wrap; justify-content: center; }
+
+/* ── FRAMES ── */
+.phone-frame { width: 390px; border-radius: 52px; background: #1a1a1a; padding: 14px; box-shadow: 0 32px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08); flex-shrink: 0; }
+.phone-screen { border-radius: 40px; overflow: hidden; height: 844px; position: relative; background: var(--bg); }
+.phone-notch  { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 126px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; z-index: 20; }
+.desktop-frame { width: 100%; max-width: 1100px; background: #2a2a2a; border-radius: 16px 16px 0 0; padding: 36px 12px 0; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+.desktop-bar  { display: flex; align-items: center; gap: 8px; padding: 0 0 10px; }
+.desktop-dot  { width: 12px; height: 12px; border-radius: 50%; }
+.desktop-screen { border-radius: 8px 8px 0 0; overflow: hidden; height: 700px; background: var(--bg); position: relative; }
+
+/* ── APP SHELL ── */
+.app { height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+.status-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px 8px; }
+.status-time { font-size: 15px; font-weight: 700; color: var(--ink); }
+.scroll-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0 100px; }
+.scroll-content::-webkit-scrollbar { display: none; }
+
+.bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; height: 82px; background: rgba(255,255,255,.88); backdrop-filter: blur(24px) saturate(180%); border-top: 1px solid rgba(0,0,0,.06); display: flex; align-items: center; justify-content: space-around; padding: 0 8px 16px; z-index: 100; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: var(--r-md); }
+.nav-item.active { background: var(--primary-light); }
+.nav-item.active svg, .nav-item.active .nav-label { color: var(--primary); }
+.nav-icon  { width: 22px; height: 22px; color: var(--ink-3); }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--ink-3); }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px 12px; }
+.greeting-sub  { font-size: 12px; font-weight: 600; color: var(--primary); }
+.greeting-name { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.4px; }
+.topbar-right  { display: flex; gap: 10px; align-items: center; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); position: relative; }
+.avatar   { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,var(--primary),var(--emerald)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+.notif-badge { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); border: 1.5px solid var(--bg); }
+
+.screen-topbar { display: flex; align-items: center; gap: 12px; padding: 52px 20px 16px; }
+.back-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-card); color: var(--ink); flex-shrink: 0; }
+.screen-title { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px; }
+.section-title { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+.section-link  { font-size: 13px; font-weight: 600; color: var(--primary); }
+
+/* chips & pills */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: var(--r-pill); font-size: 12px; font-weight: 700; }
+.chip.teal  { background: var(--primary-light); color: var(--primary); }
+.chip.green { background: var(--emerald-soft); color: var(--emerald); }
+.chip.gold  { background: var(--gold-soft); color: var(--gold); }
+.chip.red   { background: var(--red-soft); color: var(--red); }
+
+/* ────────────────────────────────────────────
+   1. SYNDIC — GESTION PAIEMENTS DESKTOP
+──────────────────────────────────────────── */
+.desktop-app { height:100%; display:grid; grid-template-columns:240px 1fr; background:var(--bg); }
+.desktop-sidebar { background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:24px 16px; gap:2px; }
+.desktop-logo { display:flex; align-items:center; gap:10px; padding:0 8px 24px; }
+.desktop-logo-icon { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--primary),var(--emerald)); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; }
+.desktop-logo-text { font-size:16px; font-weight:800; color:var(--ink); letter-spacing:-.3px; }
+.desktop-logo-cite { font-size:10px; font-weight:600; color:var(--ink-3); }
+.sidebar-group-label { font-size:10px; font-weight:700; color:var(--ink-3); letter-spacing:.1em; padding:12px 10px 4px; text-transform:uppercase; }
+.desktop-nav-item { display:flex; align-items:center; gap:10px; padding:10px; border-radius:var(--r-sm); font-size:13px; font-weight:600; color:var(--ink-3); }
+.desktop-nav-item.active { background:var(--primary-light); color:var(--primary); }
+.desktop-nav-item .nav-badge { margin-left:auto; background:var(--red); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:var(--r-pill); min-width:18px; text-align:center; }
+.desktop-nav-item .nav-badge.gold { background:var(--gold); color:var(--ink); }
+.desktop-sidebar-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); }
+.desktop-user { display:flex; align-items:center; gap:10px; padding:10px; border-radius:var(--r-sm); }
+.desktop-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--emerald)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; }
+.desktop-user-name { font-size:12px; font-weight:700; color:var(--ink); }
+.desktop-user-role { font-size:10px; font-weight:500; color:var(--ink-3); }
+.desktop-main { display:flex; flex-direction:column; overflow:hidden; }
+.desktop-header { display:flex; align-items:center; justify-content:space-between; padding:20px 28px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+.desktop-page-title { font-size:20px; font-weight:800; color:var(--ink); letter-spacing:-.4px; }
+.desktop-page-sub { font-size:12px; color:var(--ink-3); font-weight:500; margin-top:2px; }
+.desktop-header-actions { display:flex; gap:10px; align-items:center; }
+.btn-primary   { display:flex; align-items:center; gap:7px; padding:9px 16px; border-radius:var(--r-sm); background:var(--primary); color:#fff; font-size:13px; font-weight:700; box-shadow:0 2px 8px rgba(13,110,90,.25); }
+.btn-secondary { display:flex; align-items:center; gap:7px; padding:9px 16px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:600; border:1px solid var(--border); }
+.desktop-body { flex:1; overflow-y:auto; padding:24px 28px; display:flex; flex-direction:column; gap:20px; }
+.desktop-body::-webkit-scrollbar { width:0; }
+
+.panel { background:var(--surface); border-radius:var(--r-md); overflow:hidden; box-shadow:var(--shadow-card); }
+.panel-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
+.panel-title { font-size:14px; font-weight:800; color:var(--ink); }
+
+/* Big KPI row */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.kpi-card { background:var(--surface); border-radius:var(--r-md); padding:18px; box-shadow:var(--shadow-card); display:flex; align-items:flex-start; gap:14px; }
+.kpi-icon { width:44px; height:44px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kpi-icon.teal  { background:var(--primary-light); color:var(--primary); }
+.kpi-icon.green { background:var(--emerald-soft); color:var(--emerald); }
+.kpi-icon.gold  { background:var(--gold-soft); color:var(--gold); }
+.kpi-icon.red   { background:var(--red-soft); color:var(--red); }
+.kpi-label { font-size:11px; font-weight:600; color:var(--ink-3); margin-bottom:4px; }
+.kpi-value { font-size:24px; font-weight:800; color:var(--ink); letter-spacing:-.5px; line-height:1; }
+.kpi-delta { font-size:11px; font-weight:600; margin-top:4px; }
+.kpi-delta.up   { color:var(--emerald); }
+.kpi-delta.mid  { color:var(--gold); }
+.kpi-delta.down { color:var(--red); }
+
+/* Payment table */
+.pay-table { width:100%; }
+.pay-row { display:grid; grid-template-columns:1.4fr 90px repeat(3,80px) 100px 50px; align-items:center; padding:11px 20px; border-bottom:1px solid var(--border); font-size:12px; }
+.pay-row:last-child { border-bottom:none; }
+.pay-row-head { background:var(--surface-2); font-weight:700; color:var(--ink-3); font-size:10px; letter-spacing:.05em; }
+.user-cell { display:flex; align-items:center; gap:10px; }
+.mini-av { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; }
+.mini-av.teal  { background:var(--primary-light); color:var(--primary); }
+.mini-av.green { background:var(--emerald-soft); color:var(--emerald); }
+.mini-av.gold  { background:var(--gold-soft); color:var(--gold); }
+.mini-av.red   { background:var(--red-soft); color:var(--red); }
+.cell-name  { font-weight:700; color:var(--ink); }
+.cell-villa { font-size:10px; color:var(--ink-3); }
+.pay-status { display:inline-flex; padding:3px 9px; border-radius:var(--r-pill); font-size:10px; font-weight:700; }
+.pay-status.paid    { background:var(--emerald-soft); color:var(--emerald); }
+.pay-status.pending { background:var(--gold-soft); color:var(--gold); }
+.pay-status.late    { background:var(--red-soft); color:var(--red); }
+.pay-status.manual  { background:var(--primary-light); color:var(--primary); }
+.pay-canal { font-size:11px; font-weight:600; color:var(--ink-2); }
+.row-action { color:var(--ink-3); }
+
+/* Progress bar */
+.progress-bar { height:6px; border-radius:var(--r-pill); background:var(--surface-2); overflow:hidden; }
+.progress-fill { height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg,var(--emerald),var(--primary)); }
+
+/* Chart bars (purely CSS) */
+.bar-chart { display:flex; gap:6px; align-items:flex-end; height:80px; padding:0 20px 0; }
+.bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.bar { width:100%; border-radius:4px 4px 0 0; }
+.bar.paid    { background:linear-gradient(180deg,var(--primary) 0%,rgba(13,110,90,.6) 100%); }
+.bar.partial { background:var(--gold); }
+.bar-label   { font-size:9px; color:var(--ink-3); font-weight:600; white-space:nowrap; }
+
+/* Manual payment modal */
+.modal-overlay { position:absolute; inset:0; background:rgba(13,27,54,.5); z-index:400; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal { background:var(--surface); border-radius:var(--r-lg); padding:24px; width:100%; max-width:500px; box-shadow:0 16px 48px rgba(0,0,0,.2); }
+.modal-title { font-size:18px; font-weight:800; color:var(--ink); margin-bottom:4px; letter-spacing:-.3px; }
+.modal-sub   { font-size:13px; color:var(--ink-3); margin-bottom:20px; font-weight:500; }
+.modal-fields { display:flex; flex-direction:column; gap:14px; margin-bottom:20px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+.config-field { display:flex; flex-direction:column; gap:6px; }
+.config-label { font-size:11px; font-weight:700; color:var(--ink-3); letter-spacing:.03em; }
+.config-input { padding:10px 14px; border-radius:var(--r-sm); border:1.5px solid var(--border); background:var(--surface-2); font-family:var(--font); font-size:13px; color:var(--ink); outline:none; }
+.config-input.active { border-color:var(--primary); background:#fff; }
+
+/* Canal selector */
+.canal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.canal-btn { padding:10px 8px; border-radius:var(--r-sm); border:1.5px solid var(--border); background:var(--surface-2); font-size:12px; font-weight:700; color:var(--ink-3); text-align:center; }
+.canal-btn.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); }
+
+/* ────────────────────────────────────────────
+   2. PROFIL HABITANT
+──────────────────────────────────────────── */
+.profile-hero {
+  margin:0 16px;
+  background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+  border-radius:var(--r-xl);
+  padding:24px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  position:relative;
+  overflow:hidden;
+}
+.profile-hero::before {
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 14px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 14px);
+}
+.profile-big-av {
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(255,255,255,.18);
+  border:2px solid rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:800;color:#fff;
+  flex-shrink:0;
+  position:relative;z-index:1;
+}
+.profile-hero-info { position:relative;z-index:1; }
+.profile-hero-name { font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:2px; }
+.profile-hero-role { font-size:12px;color:rgba(255,255,255,.6);font-weight:500;margin-bottom:8px; }
+.profile-hero-villa {
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:11px;font-weight:700;color:#fff;
+}
+
+.profile-section {
+  margin:16px 16px 0;
+  background:var(--surface);
+  border-radius:var(--r-md);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.profile-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.profile-row:last-child { border-bottom:none; }
+.profile-row-left { display:flex;align-items:center;gap:12px; }
+.profile-row-icon { width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.profile-row-icon.teal  { background:var(--primary-light);color:var(--primary); }
+.profile-row-icon.gold  { background:var(--gold-soft);color:var(--gold); }
+.profile-row-icon.green { background:var(--emerald-soft);color:var(--emerald); }
+.profile-row-icon.red   { background:var(--red-soft);color:var(--red); }
+.profile-row-icon.gray  { background:var(--surface-2);color:var(--ink-3); }
+.profile-row-label { font-size:14px;font-weight:700;color:var(--ink); }
+.profile-row-sub   { font-size:11px;font-weight:500;color:var(--ink-3); }
+.profile-row-value { font-size:13px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:6px; }
+.lock-icon { color:var(--ink-3); }
+
+.profile-section-title { font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;padding:16px 16px 4px;background:var(--surface); }
+
+/* ────────────────────────────────────────────
+   3. DOCUMENTS
+──────────────────────────────────────────── */
+.doc-list { display:flex;flex-direction:column;gap:0;margin:0 16px; background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-card); }
+.doc-item { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border); }
+.doc-item:last-child { border-bottom:none; }
+.doc-icon { width:42px;height:42px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.doc-icon.pdf  { background:#FEF0F0;color:#CC2626; }
+.doc-icon.word { background:#EBF0FE;color:#2B4FCC; }
+.doc-body { flex:1;min-width:0; }
+.doc-name { font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.doc-meta { font-size:11px;color:var(--ink-3);font-weight:500; }
+.doc-dl-btn { width:34px;height:34px;border-radius:var(--r-sm);background:var(--primary-light);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0; }
+
+/* ────────────────────────────────────────────
+   4. ÉTATS VIDES (Empty States)
+──────────────────────────────────────────── */
+.empty-state {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 24px;text-align:center;
+}
+.empty-icon {
+  width:72px;height:72px;border-radius:var(--r-lg);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+}
+.empty-title { font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin-bottom:6px; }
+.empty-sub   { font-size:13px;color:var(--ink-3);font-weight:500;line-height:1.5;max-width:240px; }
+.empty-cta   { margin-top:20px;padding:12px 24px;border-radius:var(--r-md);background:var(--primary);color:#fff;font-size:14px;font-weight:700;box-shadow:0 4px 14px rgba(13,110,90,.25); }
+.empty-cta-ghost { margin-top:10px;padding:11px 24px;border-radius:var(--r-md);background:transparent;color:var(--primary);font-size:14px;font-weight:600; }
+
+/* ────────────────────────────────────────────
+   5. NOTIFICATIONS IN-APP
+──────────────────────────────────────────── */
+.notif-list { display:flex;flex-direction:column;gap:0;margin:0 16px;background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-card); }
+.notif-item { display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);position:relative; }
+.notif-item:last-child { border-bottom:none; }
+.notif-item.unread { background:#FAFCFA; }
+.notif-unread-dot { position:absolute;top:18px;right:16px;width:7px;height:7px;border-radius:50%;background:var(--primary); }
+.notif-icon { width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.notif-icon.green { background:var(--emerald-soft);color:var(--emerald); }
+.notif-icon.red   { background:var(--red-soft);color:var(--red); }
+.notif-icon.teal  { background:var(--primary-light);color:var(--primary); }
+.notif-icon.gold  { background:var(--gold-soft);color:var(--gold); }
+.notif-body { flex:1;min-width:0; }
+.notif-title { font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;line-height:1.3; }
+.notif-text  { font-size:12px;color:var(--ink-3);font-weight:500;line-height:1.4; }
+.notif-time  { font-size:10px;color:var(--ink-3);font-weight:600;margin-top:4px; }
+
+/* ────────────────────────────────────────────
+   6. DESIGN SYSTEM RECAP — FINAL
+──────────────────────────────────────────── */
+.ds-card {
+  background:linear-gradient(145deg,var(--primary) 0%,var(--primary-dark) 100%);
+  border-radius:var(--r-xl);
+  padding:40px;
+  position:relative;overflow:hidden;
+}
+.ds-card::before {
+  content:'';position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 14px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 14px);
+}
+.ds-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.ds-panel { background:var(--surface); border-radius:var(--r-md); padding:20px; box-shadow:var(--shadow-card); }
+.ds-panel-title { font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.2px;margin-bottom:14px;display:flex;align-items:center;gap:8px; }
+.ds-panel-title span { width:6px;height:6px;border-radius:50%;background:var(--primary);display:inline-block; }
+
+/* spacing viz */
+.space-row { display:flex;align-items:center;gap:12px;margin-bottom:8px; }
+.space-box { border-radius:4px;background:var(--primary-light);border:1px solid var(--primary-light); }
+.space-label { font-size:11px;font-weight:700;color:var(--ink-3); }
+.space-val   { font-size:11px;font-weight:700;color:var(--primary);margin-left:auto; }
+
+/* shadow viz */
+.shadow-demo { border-radius:var(--r-md);background:var(--surface);margin-bottom:10px;padding:14px;font-size:12px;font-weight:600;color:var(--ink-2); }
+
+/* radius viz */
+.radius-row { display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap; }
+.radius-box { width:48px;height:48px;background:var(--primary-light);border:2px solid var(--primary-light); display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary); }
+
+/* icon grid */
+.icon-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:12px; }
+.icon-cell { display:flex;flex-direction:column;align-items:center;gap:4px; }
+.icon-wrap { width:40px;height:40px;border-radius:var(--r-sm);background:var(--primary-light);display:flex;align-items:center;justify-content:center;color:var(--primary); }
+.icon-name { font-size:9px;font-weight:600;color:var(--ink-3);text-align:center;line-height:1.2; }
+
+/* Motion */
+.motion-row { display:flex;flex-direction:column;gap:8px; }
+.motion-item { display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-2);border-radius:var(--r-sm); }
+.motion-name { font-size:12px;font-weight:700;color:var(--ink); }
+.motion-val  { font-size:11px;font-weight:600;color:var(--primary);font-family:monospace; }
+
+@media (max-width:600px) {
+  .viewer { padding:24px 12px 40px;gap:40px; }
+  .phone-frame { width:100%;max-width:360px; }
+  .desktop-frame { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="viewer">
+
+  <!-- ══════════════════════════════════════
+       1. SYNDIC — GESTION PAIEMENTS DESKTOP
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Espace Syndic — Desktop</div>
+    <div class="viewer-title">Gestion des paiements</div>
+    <div class="viewer-sub">Tableau habitants × statuts · Saisie manuelle avec modal · Graphique mensuel · Export Excel</div>
+    <div class="desktop-frame">
+      <div class="desktop-bar">
+        <div class="desktop-dot" style="background:#FF5F57"></div>
+        <div class="desktop-dot" style="background:#FEBC2E"></div>
+        <div class="desktop-dot" style="background:#28C840"></div>
+      </div>
+      <div class="desktop-screen">
+        <div class="desktop-app">
+          <!-- Sidebar syndic -->
+          <div class="desktop-sidebar">
+            <div class="desktop-logo">
+              <div class="desktop-logo-icon">MS</div>
+              <div><div class="desktop-logo-text">MySyndic</div><div class="desktop-logo-cite">Syndic · Synacassy 1</div></div>
+            </div>
+            <div class="sidebar-group-label">Principal</div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Tableau de bord
+            </div>
+            <div class="desktop-nav-item active">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              Paiements
+              <span class="nav-badge">37</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Habitants
+            </div>
+            <div class="sidebar-group-label">Vie de la cité</div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Incidents
+              <span class="nav-badge gold">5</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Conflits
+              <span class="nav-badge gold">3</span>
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Messages
+            </div>
+            <div class="desktop-nav-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Documents
+            </div>
+            <div class="desktop-sidebar-footer">
+              <div class="desktop-user"><div class="desktop-avatar">AS</div><div><div class="desktop-user-name">Ama Sika</div><div class="desktop-user-role">Syndic · Synacassy 1</div></div></div>
+            </div>
+          </div>
+
+          <!-- Main content -->
+          <div class="desktop-main">
+            <div class="desktop-header">
+              <div><div class="desktop-page-title">Gestion des paiements</div><div class="desktop-page-sub">Septembre 2026 · 106 / 143 villas à jour</div></div>
+              <div class="desktop-header-actions">
+                <button class="btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Exporter Excel
+                </button>
+                <button class="btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Saisie manuelle
+                </button>
+              </div>
+            </div>
+
+            <div class="desktop-body">
+              <!-- KPIs -->
+              <div class="kpi-row">
+                <div class="kpi-card">
+                  <div class="kpi-icon teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                  <div><div class="kpi-label">Collecté sept.</div><div class="kpi-value">2,65M</div><div class="kpi-delta up">FCFA · +8 vs août</div></div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div><div class="kpi-label">Payées</div><div class="kpi-value">106</div><div class="kpi-delta up">74% de recouvrement</div></div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon gold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div><div class="kpi-label">Impayées</div><div class="kpi-value">37</div><div class="kpi-delta mid">925k FCFA manquants</div></div>
+                </div>
+                <div class="kpi-card">
+                  <div class="kpi-icon teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+                  </div>
+                  <div><div class="kpi-label">Via Paystack</div><div class="kpi-value">89</div><div class="kpi-delta up">17 saisies manuelles</div></div>
+                </div>
+              </div>
+
+              <!-- Chart + Table -->
+              <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px">
+                <!-- Monthly chart panel -->
+                <div class="panel">
+                  <div class="panel-head"><div class="panel-title">Collecte mensuelle 2026</div></div>
+                  <div style="padding:16px 16px 8px">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                      <div><div style="font-size:11px;color:var(--ink-3);font-weight:600">Meilleur mois</div><div style="font-size:16px;font-weight:800;color:var(--ink)">Août · 82%</div></div>
+                      <div style="text-align:right"><div style="font-size:11px;color:var(--ink-3);font-weight:600">Moyenne YTD</div><div style="font-size:16px;font-weight:800;color:var(--ink)">71%</div></div>
+                    </div>
+                    <div class="bar-chart">
+                      <div class="bar-col"><div class="bar paid" style="height:58px"></div><div class="bar-label">Jan</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:62px"></div><div class="bar-label">Fév</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:54px"></div><div class="bar-label">Mar</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:70px"></div><div class="bar-label">Avr</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:66px"></div><div class="bar-label">Mai</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:60px"></div><div class="bar-label">Jun</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:72px"></div><div class="bar-label">Jul</div></div>
+                      <div class="bar-col"><div class="bar paid" style="height:78px"></div><div class="bar-label">Aoû</div></div>
+                      <div class="bar-col"><div class="bar partial" style="height:64px"></div><div class="bar-label">Sep</div></div>
+                    </div>
+                  </div>
+                  <div style="padding:12px 16px;border-top:1px solid var(--border)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                      <div style="font-size:11px;font-weight:700;color:var(--ink-2)">Recouvrement sept.</div>
+                      <div style="font-size:12px;font-weight:800;color:var(--primary)">74%</div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:74%"></div></div>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="panel">
+                  <div class="panel-head">
+                    <div class="panel-title">Habitants — Septembre 2026</div>
+                    <div style="display:flex;gap:6px">
+                      <div style="padding:4px 10px;border-radius:var(--r-pill);background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700">Tous</div>
+                      <div style="padding:4px 10px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">Impayés</div>
+                      <div style="padding:4px 10px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">Manuel</div>
+                    </div>
+                  </div>
+                  <div class="pay-table">
+                    <div class="pay-row pay-row-head">
+                      <div>Habitant</div><div>Villa</div><div>Montant</div><div>Canal</div><div>Statut</div><div>Date</div><div></div>
+                    </div>
+                    <div class="pay-row">
+                      <div class="user-cell"><div class="mini-av green">AB</div><div><div class="cell-name">Ama Brou</div></div></div>
+                      <div class="cell-villa" style="font-size:12px;font-weight:600;color:var(--ink-2)">Villa 7</div>
+                      <div style="font-weight:700;color:var(--ink);font-size:12px">25 000</div>
+                      <div class="pay-canal">Paystack</div>
+                      <div><span class="pay-status paid">Payé</span></div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">28 août</div>
+                      <div class="row-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                    </div>
+                    <div class="pay-row">
+                      <div class="user-cell"><div class="mini-av teal">KM</div><div><div class="cell-name">Kofi Mensah</div></div></div>
+                      <div class="cell-villa" style="font-size:12px;font-weight:600;color:var(--ink-2)">Villa 14</div>
+                      <div style="font-weight:700;color:var(--ink);font-size:12px">25 000</div>
+                      <div class="pay-canal">—</div>
+                      <div><span class="pay-status pending">En attente</span></div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">—</div>
+                      <div class="row-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                    </div>
+                    <div class="pay-row">
+                      <div class="user-cell"><div class="mini-av teal">FD</div><div><div class="cell-name">Fatou Diallo</div></div></div>
+                      <div class="cell-villa" style="font-size:12px;font-weight:600;color:var(--ink-2)">Villa 3</div>
+                      <div style="font-weight:700;color:var(--ink);font-size:12px">25 000</div>
+                      <div class="pay-canal">Wave manuel</div>
+                      <div><span class="pay-status manual">Manuel</span></div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">1 sept.</div>
+                      <div class="row-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                    </div>
+                    <div class="pay-row">
+                      <div class="user-cell"><div class="mini-av red">YK</div><div><div class="cell-name">Yao Kouassi</div></div></div>
+                      <div class="cell-villa" style="font-size:12px;font-weight:600;color:var(--ink-2)">Villa 22</div>
+                      <div style="font-weight:700;color:var(--ink);font-size:12px">25 000</div>
+                      <div class="pay-canal">—</div>
+                      <div><span class="pay-status late">Impayé</span></div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">—</div>
+                      <div class="row-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                    </div>
+                    <div class="pay-row" style="border-bottom:none">
+                      <div class="user-cell"><div class="mini-av gold">MO</div><div><div class="cell-name">Mamadou Ouédraogo</div></div></div>
+                      <div class="cell-villa" style="font-size:12px;font-weight:600;color:var(--ink-2)">Villa 11</div>
+                      <div style="font-weight:700;color:var(--ink);font-size:12px">25 000</div>
+                      <div class="pay-canal">MTN Money</div>
+                      <div><span class="pay-status manual">Manuel</span></div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">2 sept.</div>
+                      <div class="row-action"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal saisie manuelle -->
+            <div class="modal-overlay">
+              <div class="modal">
+                <div class="modal-title">Enregistrer un paiement</div>
+                <div class="modal-sub">Saisie manuelle — le reçu PDF sera généré automatiquement.</div>
+                <div class="modal-fields">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="config-field">
+                      <div class="config-label">Habitant</div>
+                      <div class="config-input" style="color:var(--ink)">Kofi Mensah — Villa 14</div>
+                    </div>
+                    <div class="config-field">
+                      <div class="config-label">Mois concerné</div>
+                      <div class="config-input active" style="color:var(--ink)">Septembre 2026</div>
+                    </div>
+                  </div>
+                  <div class="config-field">
+                    <div class="config-label">Canal de paiement</div>
+                    <div class="canal-grid">
+                      <div class="canal-btn">Cash</div>
+                      <div class="canal-btn selected">Wave</div>
+                      <div class="canal-btn">Orange Money</div>
+                      <div class="canal-btn">MTN Money</div>
+                      <div class="canal-btn">Paystack</div>
+                      <div class="canal-btn">Autre</div>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="config-field">
+                      <div class="config-label">Montant (FCFA)</div>
+                      <div class="config-input" style="color:var(--ink)">25 000</div>
+                    </div>
+                    <div class="config-field">
+                      <div class="config-label">Réf. transaction Wave</div>
+                      <div class="config-input active" style="color:var(--ink)">WV-2026090214523</div>
+                    </div>
+                  </div>
+                  <div class="config-field">
+                    <div class="config-label">Photo du SMS de confirmation (optionnel)</div>
+                    <div style="border:1.5px dashed var(--border);border-radius:var(--r-sm);padding:16px;text-align:center;background:var(--surface-2)">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <div style="font-size:12px;font-weight:600;color:var(--ink-3)">Glisser une photo ou <span style="color:var(--primary)">parcourir</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button class="btn-secondary">Annuler</button>
+                  <button class="btn-primary">Enregistrer le paiement</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       2. PROFIL HABITANT + DOCUMENTS
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Profil & Documents</div>
+    <div class="viewer-title">Espace personnel habitant</div>
+    <div class="viewer-sub">Hero card profil · Champs verrouillés avec cadenas · Documents téléchargeables</div>
+    <div class="devices-row">
+
+      <!-- PROFIL -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time">9:41</span></div>
+            <div class="topbar">
+              <div><div class="greeting-sub">Mon espace</div><div class="greeting-name">Profil</div></div>
+              <div class="topbar-right"><div class="avatar">KM</div></div>
+            </div>
+            <div class="scroll-content" style="padding-top:0">
+              <!-- Hero profil -->
+              <div class="profile-hero">
+                <div class="profile-big-av">KM</div>
+                <div class="profile-hero-info">
+                  <div class="profile-hero-name">Kofi Mensah</div>
+                  <div class="profile-hero-role">Habitant · Synacassy 1</div>
+                  <div class="profile-hero-villa">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    Villa 14 · Rue des Palmiers
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-section-title" style="margin-top:16px">Informations personnelles</div>
+              <div class="profile-section">
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                    <div><div class="profile-row-label">Nom complet</div><div class="profile-row-sub">Kofi Mensah</div></div>
+                  </div>
+                  <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+                    <div><div class="profile-row-label">Email</div><div class="profile-row-sub">kofi.mensah@email.com</div></div>
+                  </div>
+                  <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8a16 16 0 0 0 6 6l.27-.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+                    <div><div class="profile-row-label">Téléphone</div><div class="profile-row-sub">+225 07 12 34 56</div></div>
+                  </div>
+                  <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                </div>
+                <!-- Champs verrouillés -->
+                <div class="profile-row" style="background:#FAFAFA">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon gray"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+                    <div><div class="profile-row-label" style="color:var(--ink-3)">Numéro de villa</div><div class="profile-row-sub">Villa 14</div></div>
+                  </div>
+                  <div class="profile-row-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Verrouillé
+                  </div>
+                </div>
+                <div class="profile-row" style="background:#FAFAFA">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon gray"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
+                    <div><div class="profile-row-label" style="color:var(--ink-3)">Rue</div><div class="profile-row-sub">Rue des Palmiers</div></div>
+                  </div>
+                  <div class="profile-row-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Verrouillé
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-section-title">Compte</div>
+              <div class="profile-section">
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                    <div class="profile-row-label">Changer le mot de passe</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <div class="profile-row-label">Documents de la cité</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-row-left">
+                    <div class="profile-row-icon gray"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+                    <div class="profile-row-label" style="color:var(--red)">Se déconnecter</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nav-label">Accueil</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="nav-label">Cotisation</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="nav-label">Quartier</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nav-label">Messages</div></div>
+              <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="nav-label">Profil</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTS + NOTIFICATIONS -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time">9:41</span></div>
+            <div class="screen-topbar">
+              <div class="back-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div class="screen-title">Documents de la cité</div>
+            </div>
+            <div class="scroll-content" style="padding-top:0">
+              <div style="padding:0 16px 10px">
+                <div style="background:var(--primary-light);border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <div style="font-size:12px;font-weight:600;color:var(--primary)">4 documents partagés par le syndic · Téléchargement libre</div>
+                </div>
+              </div>
+              <div class="doc-list">
+                <div class="doc-item">
+                  <div class="doc-icon pdf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="doc-body">
+                    <div class="doc-name">Règlement intérieur Synacassy 1</div>
+                    <div class="doc-meta">PDF · 2,4 Mo · Mis à jour janv. 2026</div>
+                  </div>
+                  <div class="doc-dl-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon pdf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="doc-body">
+                    <div class="doc-name">PV Réunion copropriétaires — Juin 2026</div>
+                    <div class="doc-meta">PDF · 842 Ko · Juin 2026</div>
+                  </div>
+                  <div class="doc-dl-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon word"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                  <div class="doc-body">
+                    <div class="doc-name">Contrat prestataires entretien espaces verts</div>
+                    <div class="doc-meta">Word · 1,1 Mo · Mars 2026</div>
+                  </div>
+                  <div class="doc-dl-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon pdf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="doc-body">
+                    <div class="doc-name">Bilan financier S1 2026</div>
+                    <div class="doc-meta">PDF · 560 Ko · Juil. 2026</div>
+                  </div>
+                  <div class="doc-dl-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                </div>
+              </div>
+
+              <!-- Notifications -->
+              <div class="section-header" style="padding-top:20px">
+                <div class="section-title">Notifications récentes</div>
+                <div class="section-link">Tout marquer lu</div>
+              </div>
+              <div class="notif-list">
+                <div class="notif-item unread">
+                  <div class="notif-unread-dot"></div>
+                  <div class="notif-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                  <div class="notif-body">
+                    <div class="notif-title">Paiement août confirmé</div>
+                    <div class="notif-text">Votre cotisation de 25 000 FCFA pour août a été enregistrée via Paystack.</div>
+                    <div class="notif-time">28 août · 18:42</div>
+                  </div>
+                </div>
+                <div class="notif-item unread">
+                  <div class="notif-unread-dot"></div>
+                  <div class="notif-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                  <div class="notif-body">
+                    <div class="notif-title">Nouvelle annonce du syndic</div>
+                    <div class="notif-text">Réunion copropriétaires le 12 septembre à 18h — salle commune.</div>
+                    <div class="notif-time">Aujourd'hui · 08:00</div>
+                  </div>
+                </div>
+                <div class="notif-item">
+                  <div class="notif-icon gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                  <div class="notif-body">
+                    <div class="notif-title">Votre conflit a été mis à jour</div>
+                    <div class="notif-text">Le syndic a pris en charge votre signalement. Statut : En médiation.</div>
+                    <div class="notif-time">Hier · 15:20</div>
+                  </div>
+                </div>
+                <div class="notif-item">
+                  <div class="notif-icon red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                  <div class="notif-body">
+                    <div class="notif-title">Nouveau message de Ama Sika</div>
+                    <div class="notif-text">La réparation de l'éclairage allée B est prévue cet après-midi.</div>
+                    <div class="notif-time">Aujourd'hui · 09:28</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPTY STATES -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time">9:41</span></div>
+            <div class="screen-topbar">
+              <div class="back-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div class="screen-title">États vides</div>
+            </div>
+            <div class="scroll-content" style="padding-top:0">
+
+              <!-- Empty: aucun incident -->
+              <div style="margin:0 16px 12px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-card)">
+                <div class="empty-state">
+                  <div class="empty-icon" style="background:var(--primary-light)">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  </div>
+                  <div class="empty-title">Aucun incident signalé</div>
+                  <div class="empty-sub">Votre quartier est calme pour le moment. Signalez un problème si vous en repérez un.</div>
+                  <button class="empty-cta">Signaler un incident</button>
+                </div>
+              </div>
+
+              <!-- Empty: aucun message -->
+              <div style="margin:0 16px 12px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-card)">
+                <div class="empty-state" style="padding:32px 24px">
+                  <div class="empty-icon" style="background:var(--gold-soft)">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <div class="empty-title">Aucun message</div>
+                  <div class="empty-sub">Démarrez une conversation avec le syndic pour toute question.</div>
+                  <button class="empty-cta" style="background:var(--gold);box-shadow:0 4px 14px rgba(232,160,32,.3)">Contacter le syndic</button>
+                </div>
+              </div>
+
+              <!-- Empty: aucune alerte (chef sécu) -->
+              <div style="margin:0 16px 12px;background:#0F1E2D;border-radius:var(--r-md);box-shadow:var(--shadow-card)">
+                <div class="empty-state" style="padding:32px 24px">
+                  <div class="empty-icon" style="background:rgba(0,168,124,.15)">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div class="empty-title" style="color:#fff">Aucune alerte active</div>
+                  <div class="empty-sub" style="color:rgba(255,255,255,.45)">Le quartier est sécurisé. Vous serez notifié en temps réel dès qu'une alerte est envoyée.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       3. DESIGN SYSTEM — RÉCAPITULATIF FINAL
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Design System — Récapitulatif</div>
+    <div class="viewer-title">Tokens, Espacement, Icônes, Motion</div>
+    <div class="viewer-sub">Toutes les variables CSS, règles d'espacement, bibliothèque d'icônes et timing d'animation</div>
+
+    <!-- Hero -->
+    <div class="ds-card">
+      <div style="position:relative;z-index:1">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em;margin-bottom:8px">MYSYNDIC · DESIGN SYSTEM v1.0</div>
+        <div style="font-size:36px;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:6px">Tout dans un seul fichier.</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.6);font-weight:500;line-height:1.6;max-width:600px;margin-bottom:24px">Palette teal tropical · Plus Jakarta Sans · iOS-style components · Mobile / Tablet / Desktop · Kente pattern hero cards · Interface sombre sécurité</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="padding:7px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700">3 breakpoints</div>
+          <div style="padding:7px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700">5 rôles utilisateurs</div>
+          <div style="padding:7px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700">12 tokens couleur</div>
+          <div style="padding:7px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700">30+ composants</div>
+          <div style="padding:7px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700">États vides inclus</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-grid">
+
+      <!-- Espacement -->
+      <div class="ds-panel">
+        <div class="ds-panel-title"><span></span>Espacement</div>
+        <div class="space-row"><div class="space-box" style="width:4px;height:16px"></div><div class="space-label">--space-1</div><div class="space-val">4px</div></div>
+        <div class="space-row"><div class="space-box" style="width:8px;height:16px"></div><div class="space-label">--space-2</div><div class="space-val">8px</div></div>
+        <div class="space-row"><div class="space-box" style="width:12px;height:16px"></div><div class="space-label">--space-3</div><div class="space-val">12px</div></div>
+        <div class="space-row"><div class="space-box" style="width:16px;height:16px"></div><div class="space-label">--space-4</div><div class="space-val">16px</div></div>
+        <div class="space-row"><div class="space-box" style="width:20px;height:16px"></div><div class="space-label">--space-5</div><div class="space-val">20px · padding horizontal</div></div>
+        <div class="space-row"><div class="space-box" style="width:24px;height:16px"></div><div class="space-label">--space-6</div><div class="space-val">24px · padding card</div></div>
+        <div class="space-row"><div class="space-box" style="width:32px;height:16px"></div><div class="space-label">--space-8</div><div class="space-val">32px · section gap</div></div>
+        <div class="space-row"><div class="space-box" style="width:40px;height:16px"></div><div class="space-label">--space-10</div><div class="space-val">40px · viewer padding</div></div>
+      </div>
+
+      <!-- Border Radius -->
+      <div class="ds-panel">
+        <div class="ds-panel-title"><span></span>Border Radius</div>
+        <div class="radius-row">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="radius-box" style="border-radius:10px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary)">10</div>
+            <div style="font-size:9px;color:var(--ink-3);font-weight:700">--r-sm</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="radius-box" style="border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary)">16</div>
+            <div style="font-size:9px;color:var(--ink-3);font-weight:700">--r-md</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="radius-box" style="border-radius:20px;width:64px;height:48px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary)">20</div>
+            <div style="font-size:9px;color:var(--ink-3);font-weight:700">--r-lg</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="radius-box" style="border-radius:24px;width:72px;height:48px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary)">24</div>
+            <div style="font-size:9px;color:var(--ink-3);font-weight:700">--r-xl · hero</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="radius-box" style="border-radius:999px;width:64px;height:36px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--primary)">pill</div>
+            <div style="font-size:9px;color:var(--ink-3);font-weight:700">--r-pill · chips</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ombres -->
+      <div class="ds-panel">
+        <div class="ds-panel-title"><span></span>Ombres</div>
+        <div class="shadow-demo" style="box-shadow:0 1px 4px rgba(13,110,90,.06),0 4px 16px rgba(13,110,90,.07)">shadow-card · Cartes standards</div>
+        <div class="shadow-demo" style="box-shadow:0 8px 32px rgba(13,110,90,.14)">shadow-float · FAB, modals</div>
+        <div class="shadow-demo" style="box-shadow:0 6px 24px rgba(232,69,60,.42);color:var(--red)">shadow-fab · Bouton urgence</div>
+        <div class="shadow-demo" style="box-shadow:0 2px 8px rgba(13,110,90,.25)">shadow-btn · Boutons primaires</div>
+      </div>
+
+      <!-- Motion -->
+      <div class="ds-panel">
+        <div class="ds-panel-title"><span></span>Animation & Motion</div>
+        <div class="motion-row">
+          <div class="motion-item"><div class="motion-name">Bottom sheet</div><div class="motion-val">cubic-bezier(.32,.72,0,1)</div></div>
+          <div class="motion-item"><div class="motion-name">Nav active</div><div class="motion-val">transition: .15s ease</div></div>
+          <div class="motion-item"><div class="motion-name">FAB pulse</div><div class="motion-val">2s ease-in-out infinite</div></div>
+          <div class="motion-item"><div class="motion-name">Secu live dot</div><div class="motion-val">1.2s ease-in-out infinite</div></div>
+          <div class="motion-item"><div class="motion-name">Modal overlay</div><div class="motion-val">opacity .2s + translate .25s</div></div>
+          <div class="motion-item"><div class="motion-name">Button press</div><div class="motion-val">scale(.97) .08s</div></div>
+        </div>
+      </div>
+
+      <!-- Icônes -->
+      <div class="ds-panel" style="grid-column:1/-1">
+        <div class="ds-panel-title"><span></span>Bibliothèque d'icônes — Stroke 1.7 · Lucide Icons · 20×20px</div>
+        <div class="icon-grid">
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="icon-name">Accueil</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div class="icon-name">Cotisation</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="icon-name">Messages</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="icon-name">Alertes</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="icon-name">Profil</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="icon-name">Urgence</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="icon-name">Incident</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="icon-name">Document</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="icon-name">Payé</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div class="icon-name">Verrouillé</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="icon-name">Like</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="icon-name">Envoyer</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div><div class="icon-name">Retour</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="icon-name">Ajouter</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="icon-name">Chercher</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div><div class="icon-name">Plus</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div class="icon-name">Télécharger</div></div>
+          <div class="icon-cell"><div class="icon-wrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="icon-name">Déconnexion</div></div>
+        </div>
+      </div>
+
+      <!-- Typographie complète -->
+      <div class="ds-panel" style="grid-column:1/-1">
+        <div class="ds-panel-title"><span></span>Échelle typographique complète</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:38px;font-weight:800;color:var(--ink);letter-spacing:-1px;flex:1">Synacassy 1</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">38px / 800 / -1px · Hero card</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-.5px;flex:1">Tableau de bord</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">28px / 800 / -.5px · Section</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.4px;flex:1">Kofi Mensah</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">22px / 800 / -.4px · Greeting</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px;flex:1">Cotisation</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">18px / 800 / -.3px · Screen title</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.3px;flex:1">Annonces récentes</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">16px / 800 · Section header</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--ink);flex:1">Panne éclairage allée B</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">14px / 700 · Card title</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:14px;font-weight:400;color:var(--ink-2);line-height:1.5;flex:1">Description de l'incident en texte régulier avec bonne lisibilité.</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">14px / 400 · Body</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:12px;font-weight:600;color:var(--ink-3);flex:1">Villa 14 · Rue des Palmiers</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">12px / 600 · Metadata</div></div>
+          <div style="display:flex;align-items:baseline;gap:16px;padding:10px 0"><div style="font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;flex:1">INFORMATIONS PERSONNELLES</div><div style="font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap">10px / 700 / uppercase · Section label</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       4. ANNONCES — CRÉER + LIRE
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Annonces</div>
+    <div class="viewer-title">Vue habitant & Création syndic</div>
+    <div class="viewer-sub">Liste lecture seule habitant · Bottom sheet création avec catégorie · Détail annonce</div>
+    <div class="devices-row">
+
+      <!-- LISTE ANNONCES HABITANT -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time" style="color:var(--ink)">9:41</span></div>
+            <div class="topbar">
+              <div><div class="greeting-sub">Vie du quartier</div><div class="greeting-name">Annonces</div></div>
+              <div class="topbar-right">
+                <div class="icon-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+              </div>
+            </div>
+            <!-- pill tabs -->
+            <div style="display:flex;gap:8px;padding:4px 16px 12px;overflow-x:auto">
+              <div style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:700;background:var(--surface);color:var(--ink-3);border:1.5px solid var(--border);white-space:nowrap;flex-shrink:0">Incidents</div>
+              <div style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:700;background:#083D31;color:#fff;border:1.5px solid #083D31;white-space:nowrap;flex-shrink:0">Annonces</div>
+              <div style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:700;background:var(--surface);color:var(--ink-3);border:1.5px solid var(--border);white-space:nowrap;flex-shrink:0">Mes conflits</div>
+            </div>
+            <div class="scroll-content" style="padding:0 0 100px">
+
+              <!-- Annonce épinglée -->
+              <div style="margin:0 16px 10px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--r-md);padding:16px;position:relative;overflow:hidden;box-shadow:var(--shadow-float)">
+                <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);pointer-events:none"></div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;position:relative;z-index:1">
+                  <div style="padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.18);font-size:10px;font-weight:700;color:#fff">📌 Épinglée</div>
+                  <div style="padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.12);font-size:10px;font-weight:700;color:rgba(255,255,255,.7)">Syndic</div>
+                </div>
+                <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:6px;position:relative;z-index:1">Réunion copropriétaires — 12 sept.</div>
+                <div style="font-size:13px;color:rgba(255,255,255,.7);font-weight:500;line-height:1.5;margin-bottom:12px;position:relative;z-index:1">Ordre du jour : cotisations, entretien espaces verts, sécurité portail. Présence souhaitée pour tous les habitants.</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1">
+                  <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600">Salle commune · 18h00 · Aujourd'hui</div>
+                  <div style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.15);font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.2)">Lire</div>
+                </div>
+              </div>
+
+              <!-- Annonces normales -->
+              <div style="margin:0 16px 8px;background:var(--surface);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-card)">
+                <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+                    <div>
+                      <div style="display:flex;gap:6px;margin-bottom:6px">
+                        <div style="padding:3px 8px;border-radius:999px;background:var(--gold-soft);font-size:10px;font-weight:700;color:var(--gold)">Maintenance</div>
+                      </div>
+                      <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px">Coupure d'eau vendredi matin</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--ink-3);font-weight:500;white-space:nowrap;margin-top:2px">hier</div>
+                  </div>
+                  <div style="font-size:13px;color:var(--ink-2);font-weight:500;line-height:1.45;margin-bottom:10px">Travaux sur le réseau principal. Coupure d'eau prévue de 8h à 12h pour les rues A et B. Prévoyez vos réserves.</div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff">AS</div>
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">Ama Sika · Syndic</div>
+                  </div>
+                </div>
+                <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+                    <div>
+                      <div style="display:flex;gap:6px;margin-bottom:6px">
+                        <div style="padding:3px 8px;border-radius:999px;background:var(--primary-light);font-size:10px;font-weight:700;color:var(--primary)">Sécurité</div>
+                      </div>
+                      <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px">Nouveau code portail principal</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--ink-3);font-weight:500;white-space:nowrap;margin-top:2px">28 août</div>
+                  </div>
+                  <div style="font-size:13px;color:var(--ink-2);font-weight:500;line-height:1.45;margin-bottom:10px">Le code d'accès du portail a été modifié pour des raisons de sécurité. Récupérez le nouveau code auprès du syndic.</div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff">AS</div>
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">Ama Sika · Syndic</div>
+                  </div>
+                </div>
+                <div style="padding:14px 16px">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+                    <div>
+                      <div style="display:flex;gap:6px;margin-bottom:6px">
+                        <div style="padding:3px 8px;border-radius:999px;background:var(--emerald-soft);font-size:10px;font-weight:700;color:var(--emerald)">Général</div>
+                      </div>
+                      <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px">Bienvenue aux nouveaux habitants</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--ink-3);font-weight:500;white-space:nowrap;margin-top:2px">20 août</div>
+                  </div>
+                  <div style="font-size:13px;color:var(--ink-2);font-weight:500;line-height:1.45;margin-bottom:10px">3 nouvelles familles rejoignent notre cité ce mois-ci. Soyons accueillants !</div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff">AS</div>
+                    <div style="font-size:11px;font-weight:600;color:var(--ink-3)">Ama Sika · Syndic</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nav-label">Accueil</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="nav-label">Cotisation</div></div>
+              <div class="nav-item active"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="nav-label">Quartier</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nav-label">Messages</div></div>
+              <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="nav-label">Profil</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SHEET SIGNALEMENT INCIDENT -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time" style="color:var(--ink)">9:41</span></div>
+            <!-- background flou -->
+            <div style="flex:1;position:relative;background:var(--bg)">
+              <div style="padding:16px;opacity:.25;pointer-events:none">
+                <div style="height:140px;background:linear-gradient(145deg,var(--primary),var(--primary-dark));border-radius:20px;margin-bottom:10px"></div>
+                <div style="height:50px;background:var(--surface);border-radius:16px;margin-bottom:8px"></div>
+                <div style="height:50px;background:var(--surface);border-radius:16px"></div>
+              </div>
+              <!-- Sheet -->
+              <div style="position:absolute;inset:0;background:rgba(13,27,54,.55);display:flex;align-items:flex-end;z-index:300">
+                <div style="width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 40px;max-height:90%">
+                  <div style="width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 20px"></div>
+                  <div style="font-size:18px;font-weight:800;color:var(--ink);margin-bottom:4px;letter-spacing:-.3px">Signaler un incident</div>
+                  <div style="font-size:13px;color:var(--ink-3);font-weight:500;margin-bottom:18px">Choisissez la catégorie</div>
+
+                  <!-- Catégorie grid -->
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--gold-soft);border:2px solid var(--gold);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--gold)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--gold);text-align:center;line-height:1.2">Électricité</div>
+                    </div>
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--surface-2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:#EAF4FD;display:flex;align-items:center;justify-content:center;color:#2196F3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.2">Eau</div>
+                    </div>
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--surface-2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:#EDE8FD;display:flex;align-items:center;justify-content:center;color:#7C3AED">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.2">Stationnement</div>
+                    </div>
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--surface-2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--emerald-soft);display:flex;align-items:center;justify-content:center;color:var(--emerald)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.2">Propreté</div>
+                    </div>
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--surface-2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--red-soft);display:flex;align-items:center;justify-content:center;color:var(--red)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.2">Sécurité</div>
+                    </div>
+                    <div style="padding:12px 8px;border-radius:var(--r-md);background:var(--surface-2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-3)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      </div>
+                      <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-align:center;line-height:1.2">Autre</div>
+                    </div>
+                  </div>
+
+                  <!-- Description -->
+                  <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px">Description</div>
+                  <textarea style="width:100%;padding:12px;border-radius:var(--r-md);border:1.5px solid var(--primary);background:#fff;font-family:var(--font);font-size:14px;color:var(--ink);resize:none;height:76px;outline:none;margin-bottom:12px" placeholder="Décrivez l'incident...">Panne complète de l'éclairage sur toute l'allée B depuis ce matin.</textarea>
+
+                  <!-- Photo -->
+                  <div style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r-md);border:1.5px dashed var(--border);background:var(--surface-2);margin-bottom:16px">
+                    <div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--primary-light);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div>
+                      <div style="font-size:13px;font-weight:700;color:var(--ink)">Ajouter une photo</div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:500">Optionnel · Max 10 Mo</div>
+                    </div>
+                  </div>
+
+                  <button style="width:100%;padding:15px;border-radius:var(--r-md);background:var(--primary);color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 16px rgba(13,110,90,.3)">Envoyer le signalement</button>
+                  <button style="width:100%;padding:12px;margin-top:8px;font-size:14px;font-weight:600;color:var(--ink-3)">Annuler</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRÉER ANNONCE (SYNDIC MOBILE) -->
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="app">
+            <div class="status-bar"><span class="status-time" style="color:var(--ink)">9:41</span></div>
+            <div style="flex:1;position:relative;background:var(--bg)">
+              <div style="padding:16px;opacity:.2;pointer-events:none">
+                <div style="height:180px;background:var(--surface);border-radius:16px;margin-bottom:8px"></div>
+              </div>
+              <div style="position:absolute;inset:0;background:rgba(13,27,54,.55);display:flex;align-items:flex-end;z-index:300">
+                <div style="width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 44px">
+                  <div style="width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 20px"></div>
+                  <div style="font-size:18px;font-weight:800;color:var(--ink);margin-bottom:4px;letter-spacing:-.3px">Nouvelle annonce</div>
+                  <div style="font-size:13px;color:var(--ink-3);font-weight:500;margin-bottom:18px">Sera visible par tous les habitants</div>
+
+                  <!-- Catégorie scroll -->
+                  <div style="margin-bottom:14px">
+                    <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:8px">Catégorie</div>
+                    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px">
+                      <div style="padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;background:#083D31;color:#fff;flex-shrink:0">Général</div>
+                      <div style="padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink-3);border:1.5px solid var(--border);flex-shrink:0">Maintenance</div>
+                      <div style="padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink-3);border:1.5px solid var(--border);flex-shrink:0">Sécurité</div>
+                      <div style="padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink-3);border:1.5px solid var(--border);flex-shrink:0">Urgent</div>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom:12px">
+                    <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px">Titre</div>
+                    <div style="padding:13px 14px;border-radius:var(--r-md);border:1.5px solid var(--primary);background:#fff;font-size:15px;font-weight:700;color:var(--ink)">Réunion copropriétaires — 12 sept.</div>
+                  </div>
+
+                  <div style="margin-bottom:16px">
+                    <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px">Contenu</div>
+                    <textarea style="width:100%;padding:12px 14px;border-radius:var(--r-md);border:1.5px solid var(--border);background:var(--surface-2);font-family:var(--font);font-size:14px;color:var(--ink);resize:none;height:88px;outline:none">Ordre du jour : cotisations, entretien espaces verts, portail. Salle commune à 18h. Présence souhaitée.</textarea>
+                  </div>
+
+                  <!-- Épingler toggle -->
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:var(--r-md);background:var(--primary-light);margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg>
+                      <div>
+                        <div style="font-size:13px;font-weight:700;color:var(--primary)">Épingler en haut</div>
+                        <div style="font-size:11px;color:var(--primary);opacity:.7">Toujours visible en premier</div>
+                      </div>
+                    </div>
+                    <!-- Toggle ON -->
+                    <div style="width:44px;height:26px;border-radius:999px;background:var(--primary);display:flex;align-items:center;padding:3px;justify-content:flex-end">
+                      <div style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+                    </div>
+                  </div>
+
+                  <button style="width:100%;padding:15px;border-radius:var(--r-md);background:var(--primary);color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 16px rgba(13,110,90,.3)">Publier l'annonce</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       5. SYNDIC — VIE DU QUARTIER DESKTOP
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Syndic — Desktop</div>
+    <div class="viewer-title">Modération — Incidents & Conflits</div>
+    <div class="viewer-sub">Vue desktop du syndic · Incidents avec actions de modération · Gestion des conflits avec statut et note interne</div>
+    <div class="desktop-frame">
+      <div class="desktop-bar">
+        <div class="desktop-dot" style="background:#FF5F57"></div>
+        <div class="desktop-dot" style="background:#FEBC2E"></div>
+        <div class="desktop-dot" style="background:#28C840"></div>
+      </div>
+      <div class="desktop-screen">
+        <div style="height:100%;display:grid;grid-template-columns:240px 1fr;background:var(--bg)">
+          <!-- Sidebar -->
+          <div style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;gap:2px">
+            <div style="display:flex;align-items:center;gap:10px;padding:0 8px 24px">
+              <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">MS</div>
+              <div><div style="font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.3px">MySyndic</div><div style="font-size:10px;font-weight:600;color:var(--ink-3)">Syndic · Synacassy 1</div></div>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.1em;padding:4px 10px 4px;text-transform:uppercase">Principal</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Paiements<span style="margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px">37</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Habitants</div>
+            <div style="font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.1em;padding:12px 10px 4px;text-transform:uppercase">Vie de la cité</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Incidents<span style="margin-left:auto;background:var(--gold);color:var(--ink);font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px">5</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Annonces</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);background:var(--primary-light);font-size:13px;font-weight:600;color:var(--primary)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Conflits<span style="margin-left:auto;background:var(--gold);color:var(--ink);font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px">3</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;color:var(--ink-3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages</div>
+            <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">AS</div>
+                <div><div style="font-size:12px;font-weight:700;color:var(--ink)">Ama Sika</div><div style="font-size:10px;color:var(--ink-3)">Syndic</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main -->
+          <div style="display:flex;flex-direction:column;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+              <div><div style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.4px">Conflits de voisinage</div><div style="font-size:12px;color:var(--ink-3);font-weight:500;margin-top:2px">3 en cours · Synacassy 1</div></div>
+              <div style="display:flex;gap:10px">
+                <div style="display:flex;gap:6px">
+                  <div style="padding:5px 12px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700">Tous</div>
+                  <div style="padding:5px 12px;border-radius:999px;background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">En médiation</div>
+                  <div style="padding:5px 12px;border-radius:999px;background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:600;border:1px solid var(--border)">Résolus</div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:12px">
+
+              <!-- Conflit 1 — En médiation, détail ouvert -->
+              <div style="background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-card);overflow:hidden;border:2px solid var(--primary-light)">
+                <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:16px">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                      <div style="font-size:14px;font-weight:800;color:var(--ink)">Bruit nocturne répété</div>
+                      <div style="padding:3px 8px;border-radius:999px;background:var(--gold-soft);color:var(--gold);font-size:10px;font-weight:700">En médiation</div>
+                    </div>
+                    <div style="display:flex;gap:12px">
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:4px">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Déclarant : Kofi Mensah · Villa 14
+                      </div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:4px">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                        Villa ciblée : Villa 15
+                      </div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Bruit · 26 août 2026</div>
+                    </div>
+                  </div>
+                  <button style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);background:var(--emerald);color:#fff;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,168,124,.25)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Résoudre
+                  </button>
+                  <button style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink-2);font-size:12px;font-weight:600;border:1px solid var(--border)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Contacter
+                  </button>
+                  <button style="padding:7px 12px;border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink-3);font-size:12px;font-weight:600;border:1px solid var(--border)">Classer</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+                  <div style="padding:16px 20px;border-right:1px solid var(--border)">
+                    <div style="font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Description habitant</div>
+                    <div style="font-size:13px;color:var(--ink-2);font-weight:500;line-height:1.5">Musique très forte et fêtes jusqu'à 3h du matin tous les week-ends depuis 3 semaines. La situation devient insupportable pour mes enfants.</div>
+                  </div>
+                  <div style="padding:16px 20px">
+                    <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">🔒 Note interne (non visible habitant)</div>
+                    <textarea style="width:100%;padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--primary-light);font-family:var(--font);font-size:13px;color:var(--ink);resize:none;height:64px;outline:none">Voisin Villa 15 contacté par téléphone le 27/08. Reconnaît le problème, dit que c'était exceptionnel. À surveiller.</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conflit 2 — Signalé -->
+              <div style="background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-card);overflow:hidden">
+                <div style="padding:16px 20px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                      <div style="font-size:14px;font-weight:800;color:var(--ink)">Stationnement zone commune</div>
+                      <div style="padding:3px 8px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:10px;font-weight:700">Signalé</div>
+                    </div>
+                    <div style="display:flex;gap:12px">
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Déclarant : Fatou Diallo · Villa 3</div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Villa ciblée : Villa 9</div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Stationnement · 2 sept. 2026</div>
+                    </div>
+                  </div>
+                  <button style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);background:var(--primary);color:#fff;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(13,110,90,.25)">Prendre en charge</button>
+                  <button style="padding:7px 12px;border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink-3);font-size:12px;font-weight:600;border:1px solid var(--border)">Voir détail</button>
+                </div>
+              </div>
+
+              <!-- Conflit 3 — Résolu -->
+              <div style="background:var(--surface);border-radius:var(--r-md);box-shadow:var(--shadow-card);overflow:hidden;opacity:.7">
+                <div style="padding:16px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                      <div style="font-size:14px;font-weight:800;color:var(--ink)">Dépôt d'ordures hors horaire</div>
+                      <div style="padding:3px 8px;border-radius:999px;background:var(--emerald-soft);color:var(--emerald);font-size:10px;font-weight:700">Résolu</div>
+                    </div>
+                    <div style="display:flex;gap:12px">
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Déclarant : Mamadou O. · Villa 11</div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Villa ciblée : Villa 6</div>
+                      <div style="font-size:11px;color:var(--ink-3);font-weight:600">Propreté · 15 août 2026</div>
+                    </div>
+                  </div>
+                  <button style="padding:7px 12px;border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink-3);font-size:12px;font-weight:600;border:1px solid var(--border)">Voir détail</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       6. VARIABLES CSS + TAILWIND CONFIG
+  ══════════════════════════════════════ -->
+  <div class="viewer-section">
+    <div class="viewer-label">Implémentation</div>
+    <div class="viewer-title">Variables CSS & Config Tailwind</div>
+    <div class="viewer-sub">Copier-coller direct dans votre projet React + TailwindCSS</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <!-- CSS Variables -->
+      <div style="background:#0F1E2D;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-float)">
+        <div style="padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;background:#FF5F57"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#FEBC2E"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#28C840"></div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">globals.css</div>
+        </div>
+        <pre style="padding:20px;font-size:12px;color:#a8d8c8;font-family:'SF Mono','Fira Code',monospace;line-height:1.7;overflow-x:auto;white-space:pre"><span style="color:#5DFFC8">:root</span> {
+  <span style="color:#FFD166">/* Couleurs */</span>
+  --bg:            <span style="color:#79D4BB">#F5F7F4</span>;
+  --surface:       <span style="color:#79D4BB">#FFFFFF</span>;
+  --surface-2:     <span style="color:#79D4BB">#F0F3F0</span>;
+  --ink:           <span style="color:#79D4BB">#0F1E2D</span>;
+  --ink-2:         <span style="color:#79D4BB">#3A5068</span>;
+  --ink-3:         <span style="color:#79D4BB">#8BA4B8</span>;
+  --border:        <span style="color:#79D4BB">#E2EAE7</span>;
+
+  <span style="color:#FFD166">/* Primary */</span>
+  --primary:       <span style="color:#79D4BB">#0D6E5A</span>;
+  --primary-light: <span style="color:#79D4BB">#E6F5F1</span>;
+  --primary-dark:  <span style="color:#79D4BB">#083D31</span>;
+
+  <span style="color:#FFD166">/* États */</span>
+  --emerald:       <span style="color:#79D4BB">#00A87C</span>;
+  --emerald-soft:  <span style="color:#79D4BB">#DDFAF0</span>;
+  --gold:          <span style="color:#79D4BB">#E8A020</span>;
+  --gold-soft:     <span style="color:#79D4BB">#FEF3DC</span>;
+  --red:           <span style="color:#79D4BB">#E8453C</span>;
+  --red-soft:      <span style="color:#79D4BB">#FDECEA</span>;
+
+  <span style="color:#FFD166">/* Radius */</span>
+  --r-sm:   <span style="color:#79D4BB">10px</span>;
+  --r-md:   <span style="color:#79D4BB">16px</span>;
+  --r-lg:   <span style="color:#79D4BB">20px</span>;
+  --r-xl:   <span style="color:#79D4BB">24px</span>;
+  --r-pill: <span style="color:#79D4BB">999px</span>;
+
+  <span style="color:#FFD166">/* Ombres */</span>
+  --shadow-card:  <span style="color:#79D4BB">0 1px 4px rgba(13,110,90,.06),
+                  0 4px 16px rgba(13,110,90,.07)</span>;
+  --shadow-float: <span style="color:#79D4BB">0 8px 32px rgba(13,110,90,.14)</span>;
+  --shadow-fab:   <span style="color:#79D4BB">0 6px 24px rgba(232,69,60,.42)</span>;
+
+  <span style="color:#FFD166">/* Font */</span>
+  --font: <span style="color:#79D4BB">'Plus Jakarta Sans',
+          -apple-system, BlinkMacSystemFont,
+          sans-serif</span>;
+  -webkit-font-smoothing: antialiased;
+}</pre>
+      </div>
+
+      <!-- Tailwind config -->
+      <div style="background:#0F1E2D;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-float)">
+        <div style="padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;background:#FF5F57"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#FEBC2E"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#28C840"></div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">tailwind.config.js</div>
+        </div>
+        <pre style="padding:20px;font-size:12px;color:#a8d8c8;font-family:'SF Mono','Fira Code',monospace;line-height:1.7;overflow-x:auto;white-space:pre"><span style="color:#FF8080">module</span>.exports = {
+  theme: {
+    extend: {
+      colors: {
+        bg:       <span style="color:#79D4BB">'#F5F7F4'</span>,
+        surface:  <span style="color:#79D4BB">'#FFFFFF'</span>,
+        ink:      <span style="color:#79D4BB">'#0F1E2D'</span>,
+        'ink-2':  <span style="color:#79D4BB">'#3A5068'</span>,
+        'ink-3':  <span style="color:#79D4BB">'#8BA4B8'</span>,
+        border:   <span style="color:#79D4BB">'#E2EAE7'</span>,
+        primary: {
+          DEFAULT: <span style="color:#79D4BB">'#0D6E5A'</span>,
+          light:   <span style="color:#79D4BB">'#E6F5F1'</span>,
+          dark:    <span style="color:#79D4BB">'#083D31'</span>,
+        },
+        emerald: {
+          DEFAULT: <span style="color:#79D4BB">'#00A87C'</span>,
+          soft:    <span style="color:#79D4BB">'#DDFAF0'</span>,
+        },
+        gold: {
+          DEFAULT: <span style="color:#79D4BB">'#E8A020'</span>,
+          soft:    <span style="color:#79D4BB">'#FEF3DC'</span>,
+        },
+        danger: {
+          DEFAULT: <span style="color:#79D4BB">'#E8453C'</span>,
+          soft:    <span style="color:#79D4BB">'#FDECEA'</span>,
+        },
+      },
+      borderRadius: {
+        sm:   <span style="color:#79D4BB">'10px'</span>,
+        md:   <span style="color:#79D4BB">'16px'</span>,
+        lg:   <span style="color:#79D4BB">'20px'</span>,
+        xl:   <span style="color:#79D4BB">'24px'</span>,
+        pill: <span style="color:#79D4BB">'999px'</span>,
+      },
+      fontFamily: {
+        sans: [<span style="color:#79D4BB">'Plus Jakarta Sans'</span>,
+               <span style="color:#79D4BB">'-apple-system'</span>,
+               <span style="color:#79D4BB">'BlinkMacSystemFont'</span>,
+               <span style="color:#79D4BB">'sans-serif'</span>],
+      },
+      boxShadow: {
+        card:  <span style="color:#79D4BB">'0 1px 4px rgba(13,110,90,.06),
+               0 4px 16px rgba(13,110,90,.07)'</span>,
+        float: <span style="color:#79D4BB">'0 8px 32px rgba(13,110,90,.14)'</span>,
+        fab:   <span style="color:#79D4BB">'0 6px 24px rgba(232,69,60,.42)'</span>,
+      },
+    },
+  },
+}</pre>
+      </div>
+
+    </div>
+
+    <!-- Classes utilitaires Tailwind -->
+    <div style="background:#0F1E2D;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-float)">
+      <div style="padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">Classes Tailwind les plus utilisées dans MySyndic</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0">
+        <div style="padding:20px;border-right:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;font-weight:700;color:#5DFFC8;margin-bottom:12px;letter-spacing:.06em">CARTES</div>
+          <pre style="font-size:12px;color:#a8d8c8;font-family:'SF Mono','Fira Code',monospace;line-height:1.9"><span style="color:#FFD166">bg-surface</span> rounded-md
+<span style="color:#FFD166">shadow-card</span>
+<span style="color:#FFD166">p-4</span> md:p-5
+<span style="color:#FFD166">overflow-hidden</span>
+
+<span style="color:#FFD166">bg-primary</span> text-white
+<span style="color:#FFD166">rounded-xl</span> p-6
+<span style="color:#FFD166">shadow-float</span>
+
+<span style="color:#FFD166">border</span> border-border
+<span style="color:#FFD166">divide-y</span> divide-border</pre>
+        </div>
+        <div style="padding:20px;border-right:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;font-weight:700;color:#5DFFC8;margin-bottom:12px;letter-spacing:.06em">TEXTE</div>
+          <pre style="font-size:12px;color:#a8d8c8;font-family:'SF Mono','Fira Code',monospace;line-height:1.9"><span style="color:#FFD166">text-ink</span> font-extrabold
+<span style="color:#FFD166">tracking-tight</span>
+
+<span style="color:#FFD166">text-ink-2</span> font-medium
+<span style="color:#FFD166">leading-relaxed</span>
+
+<span style="color:#FFD166">text-ink-3</span> font-semibold
+<span style="color:#FFD166">text-xs</span> uppercase
+<span style="color:#FFD166">tracking-wide</span>
+
+<span style="color:#FFD166">text-primary</span> font-bold
+<span style="color:#FFD166">text-emerald</span> text-gold
+<span style="color:#FFD166">text-danger</span></pre>
+        </div>
+        <div style="padding:20px">
+          <div style="font-size:11px;font-weight:700;color:#5DFFC8;margin-bottom:12px;letter-spacing:.06em">BOUTONS & CHIPS</div>
+          <pre style="font-size:12px;color:#a8d8c8;font-family:'SF Mono','Fira Code',monospace;line-height:1.9"><span style="color:#FFD166">bg-primary</span> text-white
+<span style="color:#FFD166">rounded-sm</span> px-4 py-2
+<span style="color:#FFD166">font-bold</span> text-sm
+<span style="color:#FFD166">shadow</span>[0_2px_8px...]
+
+<span style="color:#FFD166">bg-primary-light</span>
+<span style="color:#FFD166">text-primary</span>
+<span style="color:#FFD166">rounded-pill</span>
+<span style="color:#FFD166">px-3 py-1</span> text-xs
+
+<span style="color:#FFD166">bg-danger</span> text-white
+<span style="color:#FFD166">shadow-fab</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

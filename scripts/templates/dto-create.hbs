@@ -1,0 +1,45 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
+  {{#if hasInt}}IsInt,
+  {{/if}}
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
+{{#if hasRelations}}
+import { IsFlexibleUuid } from '../../common/decorators/is-flexible-uuid.decorator';
+{{/if}}
+
+export class Create{{modelName}}Dto {
+{{#each scalars}}
+{{#if isRequired}}
+  @ApiProperty({ example: {{example}} })
+{{/if}}
+{{#if isOptional}}
+  @ApiPropertyOptional({ example: {{example}} })
+{{/if}}
+{{#if isString}}
+  @IsString()
+  @MaxLength({{maxLength}})
+{{/if}}
+{{#if isInt}}
+  @IsInt()
+{{/if}}
+{{#if isOptional}}
+  @IsOptional()
+{{/if}}
+{{#if isRequired}}
+  {{name}}: {{tsType}};
+{{/if}}
+{{#if isOptional}}
+  {{name}}?: {{tsType}};
+{{/if}}
+
+{{/each}}
+{{#each relations}}
+  @IsOptional()
+  @IsFlexibleUuid()
+  {{name}}_id?: string;
+
+{{/each}}
+}
