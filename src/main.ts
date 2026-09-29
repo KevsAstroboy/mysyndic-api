@@ -3,7 +3,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { Server } from 'socket.io';
+import { type ServerOptions } from 'socket.io';
 import Redis from 'ioredis';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -17,20 +17,23 @@ async function bootstrap() {
   });
 
   const redisUrl = process.env.REDIS_URL;
-  const adapter = redisUrl
-    ? (() => {
-        const pub = new Redis(redisUrl);
-        const sub = pub.duplicate();
-        const ioAdapter = new IoAdapter(app);
-        ioAdapter.createIOServer = (port, options) => {
-          const server = new Server(port, options);
-          server.adapter(createAdapter(pub, sub));
-          return server;
-        };
-        return ioAdapter;
-      })()
-    : new IoAdapter(app);
-  app.useWebSocketAdapter(adapter);
+  if (redisUrl) {
+    const pub = new Redis(redisUrl);
+    const sub = pub.duplicate();
+    // On étend IoAdapter et on passe par `super.createIOServer` : celui-ci
+    // rattache le serveur Socket.IO au HTTP server de Nest. Un `new Server(port)`
+    // direct créerait un serveur détaché → /socket.io en 404 (aucun temps réel).
+    class RedisIoAdapter extends IoAdapter {
+      createIOServer(port: number, options?: ServerOptions) {
+        const server = super.createIOServer(port, options);
+        server.adapter(createAdapter(pub, sub));
+        return server;
+      }
+    }
+    app.useWebSocketAdapter(new RedisIoAdapter(app));
+  } else {
+    app.useWebSocketAdapter(new IoAdapter(app));
+  }
 
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new DateFormatInterceptor(), new StripNullInterceptor());

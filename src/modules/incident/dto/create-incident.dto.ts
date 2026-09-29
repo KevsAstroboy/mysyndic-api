@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsString, IsInt, IsOptional, MaxLength } from 'class-validator';
 import { IsFlexibleUuid } from '../../../common/decorators/is-flexible-uuid.decorator';
 
@@ -9,6 +10,7 @@ export class CreateIncidentDto {
   villa_id?: string;
 
   @ApiPropertyOptional({ example: 1 })
+  @Type(() => Number)
   @IsInt()
   @IsOptional()
   categorie_id?: number;

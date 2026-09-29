@@ -143,20 +143,11 @@ export class PaiementService implements OnModuleInit, OnModuleDestroy {
       throw new ForbiddenException({ code: 'VILLA_NON_ASSIGNEE', message: 'Vous n occupez pas cette villa' });
     }
 
-    const deja = await this.prisma.paiement.findFirst({
-      where: {
-        cite_id: uv.cite_id,
-        villa_id: dto.villa_id,
-        mois: dto.mois,
-        is_deleted: false,
-      },
-    });
-
     const config = await this.prisma.configuration.findFirst({
       where: { cite_id: uv.cite_id, is_deleted: false },
     });
-    const montant = config?.cotisation_mensuelle ?? null;
-    if (!montant) {
+    const montantUnitaire = config?.cotisation_mensuelle ?? null;
+    if (!montantUnitaire) {
       throw new BadRequestException({ code: 'CONFIG_MONTANT_MANQUANT', message: 'Cotisation mensuelle non configurée' });
     }
 
@@ -165,57 +156,72 @@ export class PaiementService implements OnModuleInit, OnModuleDestroy {
     });
     if (!user) throw new NotFoundException('Utilisateur introuvable');
 
-    let paiement: { id: string; statut_id: number | null };
-    if (deja) {
-      if (deja.statut_id === STATUT_CONFIRME) {
-        throw new BadRequestException({ code: 'PAIEMENT_DEJA_CONFIRME', message: 'Paiement déjà confirmé pour ce mois' });
-      }
-      // Relance : un paiement EN_ATTENTE expiré (ou déjà annulé/échoué) est réutilisé,
-      // pas dupliqué (contrainte unique cite_id + villa_id + mois).
-      const expired =
-        deja.statut_id === STATUT_ANNULE ||
-        deja.statut_id === STATUT_ECHOUE ||
-        (deja.statut_id === STATUT_EN_ATTENTE &&
-          deja.updated_at &&
-          Date.now() - deja.updated_at.getTime() > (await this.expirationDelayMinutes()) * 60_000);
-      if (!expired) {
-        throw new BadRequestException({ code: 'PAIEMENT_DEJA_INITIE', message: 'Un paiement est déjà initié pour ce mois' });
-      }
-      paiement = await this.prisma.paiement.update({
-        where: { id: deja.id },
-        data: {
-          statut_id: STATUT_EN_ATTENTE,
-          canal_id: CANAL_PAYSTACK,
-          reference_paystack: null,
-          updated_at: new Date(),
-        },
-      });
-    } else {
-      paiement = await this.prisma.paiement.create({
-        data: {
+    // Multi-mois : un paiement par mois, une seule transaction Paystack pour
+    // le total. Les mois déjà confirmés sont ignorés ; une ligne existante
+    // (EN_ATTENTE, échouée, annulée, ou supprimée) est RÉUTILISÉE pour la
+    // relance — jamais de « déjà initié » bloquant, jamais de P2002 (la
+    // contrainte unique empêche de toute façon un nouveau `create`).
+    const rows: { id: string; mois: string; montant: number }[] = [];
+    for (const mois of dto.mois) {
+      // On NE filtre PAS `is_deleted` : la contrainte unique
+      // (cite_id, villa_id, mois) couvre AUSSI les lignes supprimées.
+      const existing = await this.prisma.paiement.findFirst({
+        where: {
           cite_id: uv.cite_id,
           villa_id: dto.villa_id,
-          saisi_par: userId,
-          mois: dto.mois,
-          montant,
-          statut_id: STATUT_EN_ATTENTE,
-          canal_id: CANAL_PAYSTACK,
-          reference_paystack: null,
-          created_at: new Date(),
-          created_by: userId,
+          mois,
         },
+      });
+
+      // Déjà payé (et non supprimé) : rien à initier pour ce mois.
+      if (
+        existing &&
+        !existing.is_deleted &&
+        existing.statut_id === STATUT_CONFIRME
+      ) {
+        continue;
+      }
+
+      if (existing) {
+        // Ligne réutilisée : le `updateMany` plus bas réécrit statut,
+        // référence, montant et annule un éventuel soft-delete.
+        rows.push({ id: existing.id, mois, montant: montantUnitaire });
+      } else {
+        const created = await this.prisma.paiement.create({
+          data: {
+            cite_id: uv.cite_id,
+            villa_id: dto.villa_id,
+            saisi_par: userId,
+            mois,
+            montant: montantUnitaire,
+            statut_id: STATUT_EN_ATTENTE,
+            canal_id: CANAL_PAYSTACK,
+            reference_paystack: null,
+            created_at: new Date(),
+            created_by: userId,
+          },
+        });
+        rows.push({ id: created.id, mois, montant: montantUnitaire });
+      }
+    }
+
+    if (rows.length === 0) {
+      throw new BadRequestException({
+        code: 'PAIEMENT_DEJA_CONFIRME',
+        message: 'Tous les mois sélectionnés sont déjà payés.',
       });
     }
 
-    // Paystack impose une référence unique par transaction : une relance du même
-    // paiement (id stable) doit générer une nouvelle référence, sinon erreur 400
-    // « Duplicate Transaction Reference ». Le webhook relie la référence au
-    // paiement via reference_paystack.
-    const ref = `${paiement.id}-${Date.now()}`;
+    const total = rows.reduce((s, r) => s + r.montant, 0);
+
+    // Paystack impose une référence unique par transaction : la relance d'un
+    // même paiement (id stable) doit générer une nouvelle référence. Le webhook
+    // relie la référence à TOUS les paiements via reference_paystack.
+    const ref = `${rows[0].id}-${Date.now()}`;
     let url: string;
     try {
       const init = await this.paystack.initializePayment({
-        amount: montant,
+        amount: total,
         email: user.email,
         reference: ref,
         subaccount: config?.paystack_subaccount_code ?? undefined,
@@ -223,27 +229,44 @@ export class PaiementService implements OnModuleInit, OnModuleDestroy {
         subaccountSplit: config?.paystack_subaccount_split ?? null,
       });
       url = init.authorization_url;
-      await this.prisma.paiement.update({
-        where: { id: paiement.id },
-        data: { reference_paystack: ref, updated_at: new Date() },
+      await this.prisma.paiement.updateMany({
+        where: { id: { in: rows.map((r) => r.id) } },
+        data: {
+          reference_paystack: ref,
+          statut_id: STATUT_EN_ATTENTE,
+          canal_id: CANAL_PAYSTACK,
+          montant: montantUnitaire,
+          saisi_par: userId,
+          is_deleted: false,
+          deleted_at: null,
+          deleted_by: null,
+          updated_at: new Date(),
+          updated_by: userId,
+        },
       });
     } catch (e) {
-      await this.prisma.paiement.update({
-        where: { id: paiement.id },
+      await this.prisma.paiement.updateMany({
+        where: { id: { in: rows.map((r) => r.id) } },
         data: { statut_id: STATUT_ECHOUE, updated_at: new Date() },
       });
       this.logger.error(`Paystack init failed: ${String(e)}`);
-      throw new BadRequestException({ code: 'PAYSTACK_INIT_ERROR', message: 'Erreur lors de l initialisation du paiement' });
+      throw new BadRequestException({
+        code: 'PAYSTACK_INIT_ERROR',
+        message:
+          e instanceof Error && e.message
+            ? e.message
+            : 'Erreur lors de l initialisation du paiement',
+      });
     }
 
     await this.notif.sendToUser({
       cite_id: uv.cite_id,
       user_id: userId,
       titre: 'Paiement initié',
-      message: `Paiement Paystack de ${montant} FCFA pour ${dto.mois} initié.`,
+      message: `Paiement Paystack de ${total} FCFA pour ${dto.mois.length === 1 ? dto.mois[0] : `${dto.mois.length} mois`} initié.`,
     });
 
-    return { authorization_url: url, reference: ref, montant, mois: dto.mois };
+    return { authorization_url: url, reference: ref, montant: total, mois: dto.mois };
   }
 
   // ── Saisie manuelle multi-mois ──────────────────────────
@@ -296,22 +319,39 @@ export class PaiementService implements OnModuleInit, OnModuleDestroy {
     const created = await this.prisma.$transaction(async (tx) => {
       const list: { id: string; mois: string }[] = [];
       for (const mois of dto.mois) {
-        const p = await tx.paiement.create({
-          data: {
-            cite_id: actor.cite_id!,
-            villa_id: dto.villa_id,
-            saisi_par: actor.sub,
-            mois,
-            montant: dto.montant,
-            statut_id: STATUT_CONFIRME,
-            canal_id: canalRow.id,
-            reference_externe: dto.reference_externe ? `${dto.reference_externe}:${mois}` : null,
-            preuve_file_path: preuvePath,
-            note: dto.note,
-            created_at: now,
-            created_by: actor.sub,
-          },
+        // Contrainte unique (cite_id, villa_id, mois) : les lignes supprimées
+        // l'occupent aussi → on les ressuscite (update) au lieu de create.
+        const existing = await tx.paiement.findFirst({
+          where: { cite_id: actor.cite_id!, villa_id: dto.villa_id, mois },
         });
+        const data = {
+          saisi_par: actor.sub,
+          montant: dto.montant,
+          statut_id: STATUT_CONFIRME,
+          canal_id: canalRow.id,
+          reference_externe: dto.reference_externe
+            ? `${dto.reference_externe}:${mois}`
+            : null,
+          preuve_file_path: preuvePath,
+          note: dto.note,
+          is_deleted: false,
+          deleted_at: null,
+          deleted_by: null,
+          updated_at: now,
+          updated_by: actor.sub,
+        };
+        const p = existing
+          ? await tx.paiement.update({ where: { id: existing.id }, data })
+          : await tx.paiement.create({
+              data: {
+                cite_id: actor.cite_id!,
+                villa_id: dto.villa_id,
+                mois,
+                created_at: now,
+                created_by: actor.sub,
+                ...data,
+              },
+            });
         list.push({ id: p.id, mois });
       }
       await tx.audit_log.create({

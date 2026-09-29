@@ -55,18 +55,48 @@ export class MessageService {
     // Super admin global (sans cité) joignable par les membres de toutes les cités.
     const isGlobalSuperAdmin =
       !!dest && !dest.cite_id && dest.user_profil.length > 0;
-    if (
-      !dest ||
-      (!dest.cite_id && !isGlobalSuperAdmin) ||
-      dest.is_active !== true ||
-      dest.is_deleted === true ||
-      dest.cite?.is_active === false
-    ) {
+    if (!dest || dest.is_active !== true || dest.is_deleted === true) {
       throw new BadRequestException(
         'Destinataire invalide ou hors de votre cité',
       );
     }
-    if (citeId && dest.cite_id && dest.cite_id !== citeId) {
+    // App multi-cités : le destinataire peut être rattaché à la cité de
+    // l'expéditeur (villa courante ou profil actif) même si sa cité PRINCIPALE
+    // (`user.cite_id`) est différente. Sans ça, impossible de lui répondre.
+    const sharesCite = citeId
+      ? !!(await this.prisma.user.findFirst({
+          where: {
+            id: dest.id,
+            OR: [
+              {
+                user_villa: {
+                  some: {
+                    cite_id: citeId,
+                    is_current: true,
+                    is_deleted: false,
+                  },
+                },
+              },
+              {
+                user_profil: {
+                  some: {
+                    cite_id: citeId,
+                    is_active: true,
+                    is_deleted: false,
+                  },
+                },
+              },
+            ],
+          },
+          select: { id: true },
+        }))
+      : false;
+    if (
+      citeId &&
+      dest.cite_id !== citeId &&
+      !isGlobalSuperAdmin &&
+      !sharesCite
+    ) {
       throw new BadRequestException('Destinataire hors de votre cité');
     }
     // Conversation rattachée à la cité de l'expéditeur ; sinon (super admin
@@ -177,7 +207,30 @@ export class MessageService {
     return payload;
   }
 
+  /** Date d'adhésion du user à la cité (premier rattachement actif). */
+  private async getCitizenSince(
+    citeId: string | null,
+    userId: string,
+  ): Promise<Date | null> {
+    if (!citeId) return null;
+    const up = await this.prisma.user_profil.findFirst({
+      where: {
+        user_id: userId,
+        cite_id: citeId,
+        is_active: true,
+        is_deleted: false,
+      },
+      orderBy: { assigned_at: 'asc' },
+      select: { assigned_at: true },
+    });
+    return up?.assigned_at ?? null;
+  }
+
   async getConversations(citeId: string | null, userId: string) {
+    const citizenSince = citeId ? await this.getCitizenSince(citeId, userId) : null;
+    // Les messages de groupe antérieurs à l'adhésion restent invisibles (et
+    // ne comptent pas en "non lu") ; les conversations privées ne sont pas
+    // limitées par la date d'adhésion.
     const received = await this.prisma.message.findMany({
       where: {
         ...(citeId ? { cite_id: citeId } : {}),
@@ -186,7 +239,12 @@ export class MessageService {
           ? [
               { destinataire_id: userId },
               { expediteur_id: userId },
-              { est_groupe: true },
+              {
+                est_groupe: true,
+                ...(citizenSince
+                  ? { created_at: { gte: citizenSince } }
+                  : {}),
+              },
             ]
           : [{ destinataire_id: userId }, { expediteur_id: userId }],
       },
@@ -259,21 +317,36 @@ export class MessageService {
       : null;
     const groupName = cite?.nom ?? 'Groupe de la cité';
 
+    const onlineMap = this.chat.areOnline(otherIds);
+
     return list.map((e) => ({
       ...e,
+      en_ligne: e.est_groupe ? false : !!onlineMap[e.other_user_id],
       contact: e.est_groupe ? null : contactById.get(e.other_user_id) ?? null,
       group_name: e.est_groupe ? groupName : null,
     }));
   }
 
+  /** Présence des utilisateurs (messagerie) : { userId: true|false }. */
+  presence(userIds: string[]): Record<string, boolean> {
+    return this.chat.areOnline(userIds);
+  }
+
   async getThread(citeId: string | null, userId: string, otherUserId: string) {
     const isGroupe = otherUserId === GROUPE_THREAD_ID;
+    // Un membre ne voit que les messages de groupe postérieurs à son adhésion.
+    const citizenSince = isGroupe
+      ? await this.getCitizenSince(citeId, userId)
+      : null;
     const messages = await this.prisma.message.findMany({
       where: {
         ...(citeId ? { cite_id: citeId } : {}),
         is_deleted: false,
         ...(isGroupe
-          ? { est_groupe: true }
+          ? {
+              est_groupe: true,
+              ...(citizenSince ? { created_at: { gte: citizenSince } } : {}),
+            }
           : {
               OR: [
                 { expediteur_id: userId, destinataire_id: otherUserId },
@@ -482,7 +555,11 @@ export class MessageService {
       },
     });
     if (!msg) throw new NotFoundException('Message introuvable');
-    if (msg.destinataire_id !== userId && msg.expediteur_id !== userId) {
+    if (
+      !msg.est_groupe &&
+      msg.destinataire_id !== userId &&
+      msg.expediteur_id !== userId
+    ) {
       throw new ForbiddenException("Vous n'êtes pas concerné par ce message");
     }
     const ttlDays = Number(process.env.REDIS_MSG_LU_TTL_DAYS || 30);
@@ -494,6 +571,41 @@ export class MessageService {
     if (msg.destinataire_id) this.chat.emitToUser(msg.destinataire_id, 'message:lu', luPayload);
 
     return { ok: true };
+  }
+
+  /**
+   * Marque comme lus tous les messages reçus d'un thread (privé ou groupe).
+   * Renvoie le nombre de messages effectivement marqués.
+   */
+  async markThreadRead(citeId: string | null, userId: string, threadId: string) {
+    const isGroupe = threadId === GROUPE_THREAD_ID;
+    const scope = {
+      ...(citeId ? { cite_id: citeId } : {}),
+      is_deleted: false,
+      NOT: { expediteur_id: userId },
+    };
+    const where = isGroupe
+      ? { ...scope, est_groupe: true }
+      : {
+          ...scope,
+          OR: [
+            { expediteur_id: threadId, destinataire_id: userId },
+            { expediteur_id: userId, destinataire_id: threadId },
+          ],
+        };
+
+    const messages = await this.prisma.message.findMany({
+      where,
+      select: { id: true },
+    });
+    if (!messages.length) return { ok: true, count: 0 };
+
+    const ttlDays = Number(process.env.REDIS_MSG_LU_TTL_DAYS || 30);
+    const key = `${READ_PREFIX}${userId}`;
+    await this.redis.sadd(key, ...messages.map((m) => m.id));
+    await this.redis.expire(key, ttlDays * 86400);
+
+    return { ok: true, count: messages.length };
   }
 
   async removeMessage(citeId: string | null, userId: string, messageId: string) {

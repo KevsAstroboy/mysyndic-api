@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -60,6 +60,55 @@ export class PaystackClientService {
     );
   }
 
+  /** Erreurs réseau transitoires (VPN, DNS, connexion) → on peut réessayer. */
+  private static readonly RETRYABLE = new Set([
+    'ECONNREFUSED',
+    'ECONNRESET',
+    'ENOTFOUND',
+    'EAI_AGAIN',
+    'ETIMEDOUT',
+    'UND_ERR_CONNECT_TIMEOUT',
+    'UND_ERR_SOCKET',
+  ]);
+
+  /**
+   * `fetch` vers Paystack avec délai borné et ré-essais. Le poste de dev est
+   * derrière un VPN qui route par intermittence vers api.paystack.co (Cloudflare)
+   * → sans ça, un simple hoquet réseau fait échouer l'initialisation du paiement.
+   */
+  private async request(
+    url: string,
+    init: RequestInit,
+    attempts = 3,
+  ): Promise<Response> {
+    let lastErr: unknown;
+    for (let i = 1; i <= attempts; i++) {
+      try {
+        return await fetch(url, {
+          ...init,
+          signal: AbortSignal.timeout(10_000),
+        });
+      } catch (e) {
+        lastErr = e;
+        const code = (e as { cause?: { code?: string } })?.cause?.code;
+        const name = (e as Error).name;
+        const retryable = !code || PaystackClientService.RETRYABLE.has(code) || name === 'TimeoutError';
+        this.logger.warn(
+          `Paystack requête ${i}/${attempts} échouée (${code ?? name})`,
+        );
+        if (i < attempts && retryable) {
+          await new Promise((r) => setTimeout(r, 300 * i));
+          continue;
+        }
+        break;
+      }
+    }
+    this.logger.error(`Paystack injoignable: ${String(lastErr)}`);
+    throw new Error(
+      'Service de paiement injoignable pour le moment. Vérifiez la connexion et réessayez.',
+    );
+  }
+
   async initializePayment(
     params: InitializePaymentParams,
   ): Promise<PaystackInitializeResponse> {
@@ -90,7 +139,7 @@ export class PaystackClientService {
       }
     }
 
-    const res = await fetch(`${this.baseUrl}/transaction/initialize`, {
+    const res = await this.request(`${this.baseUrl}/transaction/initialize`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${await this.secretKey()}`,
@@ -125,7 +174,7 @@ export class PaystackClientService {
     amount?: number;
     email?: string;
   }> {
-    const res = await fetch(`${this.baseUrl}/transaction/verify/${reference}`, {
+    const res = await this.request(`${this.baseUrl}/transaction/verify/${reference}`, {
       headers: { Authorization: `Bearer ${await this.secretKey()}` },
     });
 
@@ -164,7 +213,7 @@ export class PaystackClientService {
     };
     if (params.primaryContactEmail) body.primary_contact_email = params.primaryContactEmail;
 
-    const res = await fetch(`${this.baseUrl}/subaccount`, {
+    const res = await this.request(`${this.baseUrl}/subaccount`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${await this.secretKey()}`,
@@ -180,8 +229,10 @@ export class PaystackClientService {
     };
 
     if (!res.ok || !data.status || !data.data?.subaccount_code) {
-      throw new Error(
-        data?.message || `Échec de création du subaccount Paystack (${res.status})`,
+      // Erreur de validation Paystack (compte/banque) → 400 lisible, pas un 500.
+      throw new BadRequestException(
+        data?.message ||
+          `Échec de création du sous-compte Paystack (${res.status})`,
       );
     }
 

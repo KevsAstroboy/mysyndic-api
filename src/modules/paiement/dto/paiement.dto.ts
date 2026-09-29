@@ -20,11 +20,27 @@ export class InitPaystackDto {
   @IsFlexibleUuid()
   villa_id: string;
 
-  @ApiProperty({ example: '2026-09' })
+  @ApiProperty({
+    example: ['2026-09', '2026-10'],
+    description:
+      'Mois à régulariser (au moins 1). Accepte aussi une chaîne unique YYYY-MM.',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' && value.includes(',')
+      ? value.split(',')
+      : typeof value === 'string'
+        ? [value]
+        : value,
+  )
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
   @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, {
+    each: true,
     message: 'mois doit être au format YYYY-MM',
   })
-  mois: string;
+  mois: string[];
 }
 
 export const CANAUX_MANUELS = [

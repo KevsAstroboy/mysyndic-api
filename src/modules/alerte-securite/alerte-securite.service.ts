@@ -23,10 +23,22 @@ export class AlerteService {
     private readonly chat: ChatGateway,
   ) {}
 
-  // Chemin objet de la photo d'une alerte (pour le stream image)
-  async getPhotoPath(id: string, citeId: string): Promise<string | null> {
+  // Chemin objet de la photo d'une alerte (pour le stream image).
+  // Accès : cite active OU alerte déclarée par l'utilisateur (multi-cités).
+  async getPhotoPath(
+    id: string,
+    citeId: string,
+    userId?: string,
+  ): Promise<string | null> {
     const alerte = await this.prisma.alerte_securite.findFirst({
-      where: { id, cite_id: citeId, is_deleted: false },
+      where: {
+        id,
+        is_deleted: false,
+        OR: [
+          ...(citeId ? [{ cite_id: citeId }] : []),
+          ...(userId ? [{ habitant_id: userId }] : []),
+        ],
+      },
       select: { photo_file_path: true },
     });
     return alerte?.photo_file_path ?? null;
@@ -124,14 +136,24 @@ export class AlerteService {
   }
 
   /**
-   * Alertes DÉCLARÉES PAR l'habitant connecté (toutes cités) — suivi perso.
+   * Alertes DÉCLARÉES PAR l'habitant connecté, dans la cité ACTIVE.
    * Accessible à tout profil connecté, sans feature sécurité : un habitant
-   * doit pouvoir suivre ses propres signalements.
+   * doit pouvoir suivre ses propres signalements — mais seulement dans le
+   * contexte de la cité où il navigue (app multi-cités).
    */
-  async mesAlertes(habitantId: string, page: number, size: number) {
+  async mesAlertes(
+    habitantId: string,
+    citeId: string | null,
+    page: number,
+    size: number,
+  ) {
     const safePage = Math.max(1, page);
     const safeSize = Math.min(50, Math.max(1, size));
-    const where = { habitant_id: habitantId, is_deleted: false };
+    const where = {
+      habitant_id: habitantId,
+      is_deleted: false,
+      ...(citeId ? { cite_id: citeId } : {}),
+    };
     const [total, items] = await Promise.all([
       this.prisma.alerte_securite.count({ where }),
       this.prisma.alerte_securite.findMany({

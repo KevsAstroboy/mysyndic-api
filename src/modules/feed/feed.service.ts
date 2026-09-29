@@ -94,6 +94,7 @@ export interface AuthorDto {
   prenom: string;
   nom: string;
   photo_url: string | null;
+  photo_file_path: string | null;
   villa: AuthorVillaDto | null;
 }
 
@@ -255,6 +256,7 @@ export class FeedService {
       prenom: author.prenom,
       nom: author.nom,
       photo_url,
+      photo_file_path: author.photo_file_path ?? null,
       villa: uv?.villa
         ? { numero: uv.villa.numero, rue: uv.villa.rue ?? null }
         : null,
@@ -521,7 +523,7 @@ export class FeedService {
         is_deleted: false,
         niveau: 1,
       },
-      orderBy: [{ created_at: "asc" as const }, { id: "asc" as const }],
+      orderBy: [{ created_at: "desc" as const }, { id: "desc" as const }],
       include: { user: { select: userSelect(citeId) } },
     });
     for (const c of rows) {
@@ -612,7 +614,7 @@ export class FeedService {
 
     const preview = await this.prisma.feed_post_commentaire.findMany({
       where: { post_id: id, is_deleted: false, niveau: 1 },
-      orderBy: [{ created_at: "asc" as const }, { id: "asc" as const }],
+      orderBy: [{ created_at: "desc" as const }, { id: "desc" as const }],
       take: PREVIEW_COMMENTS,
       include: { user: { select: userSelect(citeId) } },
     });
@@ -641,7 +643,7 @@ export class FeedService {
 
     const rows = await this.prisma.feed_post_commentaire.findMany({
       where: { post_id: postId, is_deleted: false, niveau: 1 },
-      orderBy: [{ created_at: "asc" as const }, { id: "asc" as const }],
+      orderBy: [{ created_at: "desc" as const }, { id: "desc" as const }],
       take: limit + 1,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
       include: { user: { select: userSelect(citeId) } },
@@ -659,7 +661,7 @@ export class FeedService {
             niveau: 2,
             parent_id: { in: parentIds },
           },
-          orderBy: [{ created_at: "asc" as const }, { id: "asc" as const }],
+          orderBy: [{ created_at: "desc" as const }, { id: "desc" as const }],
           include: { user: { select: userSelect(citeId) } },
         })
       : [];

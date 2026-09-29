@@ -74,7 +74,11 @@ export class AlerteController {
     @Request() req: AuthenticatedRequest,
     @Res() res: Response,
   ) {
-    const path = await this.alerteService.getPhotoPath(id, req.user.cite_id!);
+    const path = await this.alerteService.getPhotoPath(
+      id,
+      req.user.cite_id!,
+      req.user.sub,
+    );
     if (!path) throw new NotFoundException('Aucune photo pour cette alerte');
     const bucket = await this.upload.bucket();
     const object = await this.storage.getObjectStream(bucket, path);
@@ -124,7 +128,7 @@ export class AlerteController {
   @ApiOperation({
     summary: 'Mes alertes signalées (suivi habitant)',
     description:
-      "Accessible à tout profil connecté, sans feature de sécurité : renvoie les alertes DÉCLARÉES par l'utilisateur, avec statut actuel — pour suivre ses propres signalements. Paginé (page, size).",
+      "Accessible à tout profil connecté, sans feature de sécurité : renvoie les alertes DÉCLARÉES par l'utilisateur DANS LA CITÉ ACTIVE, avec statut actuel — pour suivre ses propres signalements. Paginé (page, size).",
   })
   @ApiResponse({ status: 200, description: 'Liste paginée de mes alertes' })
   mesAlertes(
@@ -134,6 +138,7 @@ export class AlerteController {
   ) {
     return this.alerteService.mesAlertes(
       req.user.sub,
+      req.user.cite_id ?? null,
       Number(page) || 1,
       Number(size) || 10,
     );

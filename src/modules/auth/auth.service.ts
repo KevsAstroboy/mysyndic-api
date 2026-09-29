@@ -681,12 +681,21 @@ export class AuthService {
 
     const activeCode = active?.profil?.code ?? 'HABITANT';
     const activeCiteId = active?.cite_id ?? null;
-    let features: string[] = [];
 
-    const profileIdsForFeatures =
-      active != null && allProfilIds.includes(active.profil_id)
-        ? [active.profil_id]
-        : allProfilIds;
+    // Features = union des profils DE LA MÊME CITÉ que le profil actif.
+    // Un utilisateur « HABITANT + SYNDIC » de la même cité conserve les
+    // actions habitant (INCIDENT_CREATE, CONFLIT_CREATE, ALERTE_CREATE…) même
+    // quand son profil actif est SYNDIC. Les profils globaux (cite_id null,
+    // super-admin) ne s'ajoutent que si le contexte actif est lui-même global.
+    const profileIdsForFeatures = userProfils
+      .filter(
+        (up) =>
+          (up.cite_id == null && activeCiteId == null) ||
+          up.cite_id === activeCiteId,
+      )
+      .map((up) => up.profil_id);
+
+    let features: string[] = [];
 
     if (profileIdsForFeatures.length > 0) {
       const rows = await this.prisma.$queryRawUnsafe<{ feature_code: string }[]>(

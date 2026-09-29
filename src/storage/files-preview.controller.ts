@@ -61,7 +61,11 @@ export class FilesPreviewController {
     }
 
     const isSuperAdmin = req.user.role === 'SUPER_ADMIN' && !req.user.cite_id;
-    if (!isSuperAdmin && segments[1] !== req.user.cite_id) {
+    // Les avatars sont rattachés à l'UTILISATEUR (pas à la cité active) : le
+    // segment de cité du chemin est celui où la photo a été téléversée, qui peut
+    // différer de la cité active. On ne compare donc pas la cité pour `avatars`.
+    const isAvatar = segments[0] === 'avatars';
+    if (!isSuperAdmin && !isAvatar && segments[1] !== req.user.cite_id) {
       throw new ForbiddenException('Fichier hors de votre cité');
     }
 
@@ -150,7 +154,8 @@ export class FilesPreviewController {
     }
 
     const isSuperAdmin = req.user.role === 'SUPER_ADMIN' && !req.user.cite_id;
-    if (!isSuperAdmin && segments[1] !== req.user.cite_id) {
+    const isAvatar = segments[0] === 'avatars';
+    if (!isSuperAdmin && !isAvatar && segments[1] !== req.user.cite_id) {
       throw new ForbiddenException('Fichier hors de votre cité');
     }
 

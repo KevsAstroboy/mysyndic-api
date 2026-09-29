@@ -43,8 +43,7 @@ export class VillaController {
   ) {}
 
   @Get()
-  @RequireFeature('HABITANT_READ')
-  @ApiOperation({ summary: 'Lister les villas (cité active ; SA sans cité = toutes)' })
+  @ApiOperation({ summary: 'Lister les villas de ma cité (tout membre connecté)' })
   @ApiResponse({ status: 200, description: 'Liste villas' })
   findAll(@Request() req: AuthenticatedRequest) {
     return this.villaService.findAll(req.user.cite_id);

@@ -127,7 +127,7 @@ export class IncidentService {
         incident_like: true,
         incident_commentaire: {
           where: { is_deleted: false },
-          orderBy: { created_at: 'asc' as const },
+          orderBy: { created_at: 'desc' as const },
           include: {
             user: { select: { id: true, prenom: true, nom: true } },
           },

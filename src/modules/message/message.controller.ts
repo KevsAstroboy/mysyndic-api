@@ -5,6 +5,7 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   Body,
   UseGuards,
   Request,
@@ -30,6 +31,19 @@ export class MessageController {
   @ApiResponse({ status: 200, description: 'Conversations avec dernier message + non-lus' })
   getConversations(@Request() req: AuthenticatedRequest) {
     return this.messageService.getConversations(req.user.cite_id!, req.user.sub);
+  }
+
+  @Get('presence')
+  @ApiOperation({
+    summary: 'Statut en ligne/hors ligne de plusieurs utilisateurs',
+  })
+  @ApiResponse({ status: 200, description: '{ userId: boolean }' })
+  presence(@Query('user_ids') user_ids?: string) {
+    const ids = (user_ids ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return this.messageService.presence(ids);
   }
 
   @Get('conversations/:userId')
@@ -74,6 +88,20 @@ export class MessageController {
     @Request() req: AuthenticatedRequest,
   ) {
     return this.messageService.sendGroupe(req.user.cite_id!, req.user.sub, dto);
+  }
+
+  @Patch('conversations/:threadId/lu')
+  @ApiOperation({ summary: "Marquer comme lus tous les messages d'un thread" })
+  @ApiResponse({ status: 200, description: 'Thread marqué lu' })
+  markThreadRead(
+    @Param('threadId') threadId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.messageService.markThreadRead(
+      req.user.cite_id!,
+      req.user.sub,
+      threadId,
+    );
   }
 
   @Patch(':id/lu')

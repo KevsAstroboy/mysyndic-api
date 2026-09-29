@@ -39,7 +39,7 @@ export class UserService {
   ) {}
 
   // GET /users — liste des comptes de la cité (rôle + villa enrichis pour l'admin)
-  async findAll(citeId: string) {
+  async findAll(citeId: string, profil?: string) {
     const users = await this.prisma.user.findMany({
       where: { cite_id: citeId, is_deleted: false },
       orderBy: { nom: 'asc' },
@@ -68,18 +68,23 @@ export class UserService {
       },
     });
 
-    return users.map((u) => ({
-      id: u.id,
-      prenom: u.prenom,
-      nom: u.nom,
-      email: u.email,
-      telephone: u.telephone,
-      is_active: u.is_active,
-      must_change_password: u.must_change_password,
-      created_at: u.created_at,
-      roles: u.user_profil.map((up) => up.profil),
-      villa: u.user_villa[0]?.villa ?? null,
-    }));
+    return users
+      .filter(
+        (u) =>
+          !profil || u.user_profil.some((up) => up.profil.code === profil),
+      )
+      .map((u) => ({
+        id: u.id,
+        prenom: u.prenom,
+        nom: u.nom,
+        email: u.email,
+        telephone: u.telephone,
+        is_active: u.is_active,
+        must_change_password: u.must_change_password,
+        created_at: u.created_at,
+        roles: u.user_profil.map((up) => up.profil),
+        villa: u.user_villa[0]?.villa ?? null,
+      }));
   }
 
   // GET /users/:id

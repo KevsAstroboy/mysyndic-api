@@ -203,9 +203,10 @@ model configuration {
   lien_wave                 String?   @db.VarChar(500)
   telephone_syndic          String?   @db.VarChar(50)
   telephone_urgence         String?   @db.VarChar(50)
-  paystack_subaccount_code  String?   @db.VarChar(255)
-  paystack_subaccount_mode  String?   @default("SIMPLE") @db.VarChar(10)
-  paystack_subaccount_split Int?      @default(100)
+paystack_subaccount_code String? @db.VarChar(255)
+  paystack_subaccount_mode String? @default("SIMPLE") @db.VarChar(10)
+  paystack_subaccount_split Int? @default(100)
+  paystack_subaccount_percentage Int? @default(0)
   nombre_villas_attendu     Int?
   created_at                DateTime? @default(now()) @db.Timestamp(6)
   updated_at                DateTime? @db.Timestamp(6)

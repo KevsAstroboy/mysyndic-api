@@ -51,6 +51,36 @@ export class NotificationController {
       : { user_id: req.user.sub };
   }
 
+  /** Adhésion du user à la cité courante (NULL → pas de filtre temporaire). */
+  private async citizenSince(
+    citeId: string | null,
+    userId: string,
+  ): Promise<Date | null> {
+    if (!citeId) return null;
+    const up = await this.prisma.user_profil.findFirst({
+      where: {
+        user_id: userId,
+        cite_id: citeId,
+        is_active: true,
+        is_deleted: false,
+      },
+      orderBy: { assigned_at: 'asc' },
+      select: { assigned_at: true },
+    });
+    return up?.assigned_at ?? null;
+  }
+
+  /**
+   * Notifications visibles : scope utilisateur/cité + créées APRÈS l'adhésion.
+   * Un nouveau résident ne reçoit pas l'historique antérieur à son arrivée.
+   */
+  private async scopedWhere(req: AuthenticatedRequest) {
+    const base = this.userScope(req);
+    if (!req.user.cite_id) return base;
+    const since = await this.citizenSince(req.user.cite_id, req.user.sub);
+    return since ? { ...base, created_at: { gte: since } } : base;
+  }
+
   @Get('get-by-criteria')
   @ApiOperation({
     summary: 'Mes notifications — DSL critères paginé',
@@ -63,7 +93,7 @@ export class NotificationController {
   ) {
     await this.purgeExpired();
     return this.criteria.paginate('notification', query, {
-      ...this.userScope(req),
+      ...await this.scopedWhere(req),
       is_deleted: false,
     });
   }
@@ -85,7 +115,7 @@ export class NotificationController {
   async badge(@Request() req: AuthenticatedRequest) {
     await this.purgeExpired();
     const count = await this.prisma.notification.count({
-      where: { ...this.userScope(req), lu: false, is_deleted: false },
+      where: { ...await this.scopedWhere(req), lu: false, is_deleted: false },
     });
     return { count };
   }
@@ -96,7 +126,7 @@ export class NotificationController {
   async findAll(@Request() req: AuthenticatedRequest) {
     await this.purgeExpired();
     return this.prisma.notification.findMany({
-      where: { ...this.userScope(req), is_deleted: false },
+      where: { ...await this.scopedWhere(req), is_deleted: false },
       orderBy: { created_at: 'desc' as const },
       take: 100,
       select: {
@@ -119,7 +149,7 @@ export class NotificationController {
   @ApiResponse({ status: 404, description: 'Non trouvée' })
   async markRead(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     const notif = await this.prisma.notification.findFirst({
-      where: { id, ...this.userScope(req), is_deleted: false },
+      where: { id, ...await this.scopedWhere(req), is_deleted: false },
     });
     if (!notif) throw new NotFoundException('Notification introuvable');
     return this.prisma.notification.update({
@@ -133,7 +163,7 @@ export class NotificationController {
   @ApiResponse({ status: 200, description: 'Toutes marquées lues' })
   async readAll(@Request() req: AuthenticatedRequest) {
     await this.prisma.notification.updateMany({
-      where: { ...this.userScope(req), lu: false, is_deleted: false },
+      where: { ...await this.scopedWhere(req), lu: false, is_deleted: false },
       data: { lu: true, lu_at: new Date() },
     });
     return { ok: true };

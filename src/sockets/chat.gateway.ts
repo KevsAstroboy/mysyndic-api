@@ -15,11 +15,22 @@ import { JwtPayload } from '../common/types/jwt-payload.interface';
 
 @WebSocketGateway({
   cors: { origin: '*', credentials: true },
+  // Sous `/api/...` : le relais Next (mode lien public) proxy déjà /api/*.
+  // Next retire le slash final → `addTrailingSlash: false` pour que engine.io
+  // accepte `/api/socket.io` sans slash.
+  path: '/api/socket.io',
+  addTrailingSlash: false,
 })
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(ChatGateway.name);
+
+  /**
+   * Présence : userId → ensemble des sockets ouverts. En mémoire (instance
+   * unique). Sert à afficher « en ligne / hors ligne » dans la messagerie.
+   */
+  private readonly online = new Map<string, Set<string>>();
 
   @WebSocketServer()
   server: Server;
@@ -45,6 +56,17 @@ export class ChatGateway
       if (payload.cite_id) {
         await client.join(`cite:${payload.cite_id}`);
       }
+
+      // Présence : premier socket de cet utilisateur → il devient « en ligne ».
+      const first = !this.online.has(userId);
+      const set = this.online.get(userId) ?? new Set<string>();
+      set.add(client.id);
+      this.online.set(userId, set);
+      if (first && payload.cite_id) {
+        this.server
+          ?.to(`cite:${payload.cite_id}`)
+          .emit('presence:update', { user_id: userId, en_ligne: true });
+      }
     } catch (e) {
       this.logger.warn(`Connexion socket refusée : ${String(e)}`);
       client.disconnect(true);
@@ -52,9 +74,36 @@ export class ChatGateway
   }
 
   handleDisconnect(client: Socket) {
+    const userId = client.data.userId as string | undefined;
+    const citeId = client.data.citeId as string | null | undefined;
+    if (userId) {
+      const set = this.online.get(userId);
+      if (set) {
+        set.delete(client.id);
+        if (set.size === 0) {
+          this.online.delete(userId);
+          if (citeId) {
+            this.server
+              ?.to(`cite:${citeId}`)
+              .emit('presence:update', { user_id: userId, en_ligne: false });
+          }
+        }
+      }
+    }
     client.rooms.forEach((room) => {
       if (room !== client.id) client.leave(room);
     });
+  }
+
+  isOnline(userId: string): boolean {
+    return this.online.has(userId);
+  }
+
+  /** Présence en lot : { userId: true|false }. */
+  areOnline(userIds: string[]): Record<string, boolean> {
+    const out: Record<string, boolean> = {};
+    for (const id of userIds) out[id] = this.online.has(id);
+    return out;
   }
 
   @SubscribeMessage('ping')

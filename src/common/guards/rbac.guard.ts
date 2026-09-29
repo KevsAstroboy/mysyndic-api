@@ -48,9 +48,17 @@ export class RbacGuard implements CanActivate {
     }
 
     if (!session.features.includes(requiredFeature)) {
-      throw new ForbiddenException(
-        `Permission refusée : ${requiredFeature}`,
-      );
+      // Session possiblement périmée (feature ajoutée après mise en cache, le
+      // `version_tag` n'étant pas fiable) : on recalcule UNE fois en conservant
+      // le profil actif avant de refuser.
+      session = await this.authService.refreshSession(userId, {
+        userProfilId: session.userProfilId ?? undefined,
+      });
+      if (!session.features.includes(requiredFeature)) {
+        throw new ForbiddenException(
+          `Permission refusée : ${requiredFeature}`,
+        );
+      }
     }
 
     return true;

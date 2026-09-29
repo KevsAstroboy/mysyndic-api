@@ -137,6 +137,8 @@ export class CiteService {
           cite_id: cite.id,
           paystack_subaccount_mode: 'SIMPLE',
           paystack_subaccount_split: 100,
+          ...(dto.nombre_villas_attendu !== undefined && { nombre_villas_attendu: dto.nombre_villas_attendu }),
+          ...(dto.paystack_subaccount_code !== undefined && { paystack_subaccount_code: dto.paystack_subaccount_code }),
           created_at: new Date(),
         },
       });
@@ -160,7 +162,7 @@ export class CiteService {
   // PATCH /cites/:id
   async update(id: string, dto: UpdateCiteDto) {
     await this.findOne(id);
-    return this.prisma.cite.update({
+    const cite = await this.prisma.cite.update({
       where: { id },
       data: {
         ...(dto.nom !== undefined && { nom: dto.nom }),
@@ -170,5 +172,19 @@ export class CiteService {
         updated_at: new Date(),
       },
     });
+
+    // Champs stockés dans la configuration (nombre de villas attendu, subaccount Paystack).
+    if (dto.nombre_villas_attendu !== undefined || dto.paystack_subaccount_code !== undefined) {
+      await this.prisma.configuration.updateMany({
+        where: { cite_id: id, is_deleted: false },
+        data: {
+          ...(dto.nombre_villas_attendu !== undefined && { nombre_villas_attendu: dto.nombre_villas_attendu }),
+          ...(dto.paystack_subaccount_code !== undefined && { paystack_subaccount_code: dto.paystack_subaccount_code }),
+          updated_at: new Date(),
+        },
+      });
+    }
+
+    return cite;
   }
 }

@@ -90,6 +90,18 @@ export class CreateSubaccountDto {
   @Max(100)
   percentage_charge?: number;
 
+  @ApiPropertyOptional({ example: 'SIMPLE', enum: ['SIMPLE', 'SPLIT'] })
+  @IsOptional()
+  @IsIn(['SIMPLE', 'SPLIT'])
+  paystack_subaccount_mode?: 'SIMPLE' | 'SPLIT';
+
+  @ApiPropertyOptional({ example: 90 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  paystack_subaccount_split?: number;
+
   @ApiPropertyOptional({ example: 'germain@mysyndic.ci' })
   @IsOptional()
   @IsEmail()

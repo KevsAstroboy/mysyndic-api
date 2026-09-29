@@ -96,23 +96,23 @@ export class WebhookService {
         reference,
       );
 
-    // met à jour montants sur le webhook (déjà stocké)
-    const paiement = await this.prisma.paiement.findFirst({
+    // Multi-mois : UNE référence Paystack peut couvrir PLUSIEURS paiements
+    // (un par mois, même reference_paystack). On récupère tous les concernés.
+    const paiements = await this.prisma.paiement.findMany({
       where: {
         is_deleted: false,
         ...(isUuid
           ? { OR: [{ id: reference }, { reference_paystack: reference }] }
           : { reference_paystack: reference }),
       },
-      include: { villa: true },
     });
 
-    if (!paiement) {
+    if (!paiements || paiements.length === 0) {
       this.logger.warn(`Webhook Paystack référence inconnue: ${reference}`);
       return;
     }
 
-    const montantAttendu = paiement.montant;
+    const montantAttendu = paiements.reduce((s, p) => s + p.montant, 0);
     const montantRecu = amount ? Math.round(amount / 100) : null;
 
     // mise à jour webhook montants (montant_match calculé par la DB)
@@ -126,60 +126,68 @@ export class WebhookService {
       return;
     }
 
-    // idempotence logique
-    if (paiement.statut_id === 2) {
-      this.logger.log(`Paiement déjà confirmé, skip: ${paiement.id}`);
+    // Idempotence logique : on ne re-confirme que ceux pas encore confirmés.
+    const aConfirmer = paiements.filter((p) => p.statut_id !== 2);
+    if (aConfirmer.length === 0) {
+      this.logger.log(`Paiements déjà confirmés, skip: ${reference}`);
       return;
     }
 
     if (montantRecu !== montantAttendu) {
       this.logger.warn(
-        `Montant mismatch webhook: attendu ${montantAttendu}, reçu ${montantRecu} (${paiement.id})`,
+        `Montant mismatch webhook: attendu ${montantAttendu}, reçu ${montantRecu} (${reference})`,
       );
       return;
     }
 
-    // Confirmer
+    // Confirmer tous les paiements rattachés à la référence
     await this.prisma.$transaction(async (tx) => {
-      await tx.paiement.update({
-        where: { id: paiement.id },
+      await tx.paiement.updateMany({
+        where: {
+          id: { in: aConfirmer.map((p) => p.id) },
+          statut_id: { not: 2 },
+        },
         data: { statut_id: 2, updated_at: new Date() },
       });
       await tx.webhook.updateMany({
         where: { reference, aggregateur_code: 'PAYSTACK' },
         data: { traite: true, traite_at: new Date(), erreur: null, updated_at: new Date() },
       });
-      await tx.audit_log.create({
-        data: {
-          cite_id: paiement.cite_id,
-          user_id: paiement.saisi_par ?? undefined,
+      await tx.audit_log.createMany({
+        data: aConfirmer.map((p) => ({
+          cite_id: p.cite_id,
+          user_id: p.saisi_par ?? undefined,
           action: 'UPDATE',
           entite: 'paiement',
-          entite_id: paiement.id,
+          entite_id: p.id,
           created_at: new Date(),
-        } as any,
+        })) as any,
       });
     });
 
-    // Notification occupants
+    // Notification occupants (une par mois confirmé)
+    const villaIds = [...new Set(aConfirmer.map((p) => p.villa_id))];
     const occupants = await this.prisma.user_villa.findMany({
-      where: { villa_id: paiement.villa_id, is_current: true, is_deleted: false },
-      select: { user_id: true },
+      where: { villa_id: { in: villaIds }, is_current: true, is_deleted: false },
+      select: { villa_id: true, user_id: true },
     });
-    await Promise.all(
-      occupants.map((o) =>
-        this.prisma.notification.create({
-          data: {
-            cite_id: paiement.cite_id,
-            user_id: o.user_id,
-            titre: 'Paiement confirmé',
-            message: `Votre paiement de ${montantAttendu} FCFA pour ${paiement.mois} a été confirmé.`,
-            created_at: new Date(),
-          } as any,
-        }),
-      ),
-    ).catch((e) => this.logger.warn(`Notifications overflow: ${String(e)}`));
+    const notifs = aConfirmer.flatMap((p) =>
+      occupants
+        .filter((o) => o.villa_id === p.villa_id)
+        .map((o) => ({
+          cite_id: p.cite_id,
+          user_id: o.user_id,
+          titre: 'Paiement confirmé',
+          message: `Votre paiement de ${p.montant} FCFA pour ${p.mois} a été confirmé.`,
+          created_at: new Date(),
+        })),
+    );
+    await this.prisma.notification
+      .createMany({ data: notifs as any })
+      .catch((e) => this.logger.warn(`Notifications overflow: ${String(e)}`));
 
-    this.logger.log(`Paiement confirmé via webhook: ${paiement.id}`);
+    this.logger.log(
+      `Paiement(s) confirmé(s) via webhook: ${aConfirmer.map((p) => p.id).join(', ')}`,
+    );
   }
 }

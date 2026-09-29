@@ -125,6 +125,57 @@ export class VillaService {
     });
   }
 
+  // DELETE /villas/:id — suppression douce depuis la gestion super admin.
+  async remove(villaId: string, citeId: string, actorId: string) {
+    const villa = await this.prisma.villa.findFirst({
+      where: { id: villaId, cite_id: citeId, is_deleted: false },
+    });
+    if (!villa) throw new NotFoundException('Villa introuvable');
+
+    await this.prisma.$transaction(async (tx) => {
+      // Détache les occupants courants (soft revoke) pour libérer les comptes rattachés.
+      await tx.user_villa.updateMany({
+        where: { villa_id: villaId, cite_id: citeId, is_current: true, is_deleted: false },
+        data: {
+          is_current: false,
+          is_deleted: true,
+          deleted_at: new Date(),
+          deleted_by: actorId,
+          revoked_at: new Date(),
+          revoked_by: actorId,
+          updated_at: new Date(),
+          updated_by: actorId,
+        },
+      });
+
+      await tx.villa.update({
+        where: { id: villaId },
+        data: {
+          is_active: false,
+          is_deleted: true,
+          deleted_at: new Date(),
+          deleted_by: actorId,
+          updated_at: new Date(),
+          updated_by: actorId,
+        },
+      });
+
+      await tx.audit_log.create({
+        data: {
+          cite_id: citeId,
+          user_id: actorId,
+          profil_actif_code: 'SUPER_ADMIN',
+          action: 'DELETE',
+          entite: 'villa',
+          entite_id: villaId,
+          created_at: new Date(),
+        } as any,
+      });
+    });
+
+    return { message: 'Villa supprimée' };
+  }
+
   // POST /villas/:id/assign-user — attribution directe par l'admin (confirmée)
   async assignUser(villaId: string, citeId: string | null, dto: AssignUserDto, actorId: string) {
     if (!citeId) {
@@ -731,6 +782,33 @@ export class VillaService {
       select: { id: true, nom: true, ville: true, pays: true },
       orderBy: { nom: 'asc' },
     });
+  }
+
+  /** Gestion super admin : villas d'une cité + statut d'occupation + is_active. */
+  async listCitesVillas(citeId: string) {
+    const cite = await this.prisma.cite.findFirst({
+      where: { id: citeId, is_deleted: false },
+    });
+    if (!cite) throw new NotFoundException('Cité introuvable');
+
+    const villas = await this.prisma.villa.findMany({
+      where: { cite_id: citeId, is_deleted: false },
+      select: {
+        id: true,
+        numero: true,
+        rue: true,
+        description: true,
+        is_active: true,
+      },
+      orderBy: { numero: 'asc' },
+    });
+
+    const result: any[] = [];
+    for (const villa of villas) {
+      const { statut, a_pending, nb_confirmees } = await this.occupationStatut(villa.id);
+      result.push({ ...villa, statut, a_pending, nb_occupants_confirmes: nb_confirmees });
+    }
+    return result;
   }
 
   async listPublicVillas(citeId: string) {

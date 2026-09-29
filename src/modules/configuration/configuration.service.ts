@@ -28,6 +28,7 @@ export class ConfigurationService {
 
     return {
       ...config,
+      percentage_charge: config.paystack_subaccount_percentage ?? 0,
       paystack_subaccount_code: config.paystack_subaccount_code
         ? this.mask(config.paystack_subaccount_code)
         : null,
@@ -93,6 +94,52 @@ export class ConfigurationService {
     });
 
     return { paystack_subaccount_code: this.mask(code) };
+  }
+
+  // POST /cites/:id/paystack/subaccount — variante par cité (interface super
+  // admin gestion de cité). Retourne le code complet (copie) + le mode.
+  // Règle anti double-prélèvement : SPLIT → commission forcée à 0 ; une
+  // commission > 0 → mode forcé SIMPLE.
+  async createPaystackSubaccountForCite(
+    citeId: string,
+    dto: CreateSubaccountDto,
+    actorId: string,
+  ) {
+    const existing = await this.prisma.configuration.findFirst({
+      where: { cite_id: citeId, is_deleted: false },
+    });
+    if (!existing) throw new NotFoundException('Configuration introuvable pour cette cité');
+
+    const wantsSplit = dto.paystack_subaccount_mode === 'SPLIT';
+    const percentage = wantsSplit ? 0 : (dto.percentage_charge ?? 0);
+    const mode = dto.paystack_subaccount_mode ?? 'SIMPLE';
+    const split = mode === 'SPLIT' ? (dto.paystack_subaccount_split ?? 100) : null;
+
+    const { subaccount_code: code } = await this.paystack.createSubaccount({
+      businessName: dto.business_name,
+      settlementBank: dto.settlement_bank,
+      accountNumber: dto.account_number,
+      percentageCharge: percentage,
+      primaryContactEmail: dto.primary_contact_email,
+    });
+
+    await this.prisma.configuration.update({
+      where: { id: existing.id },
+      data: {
+        paystack_subaccount_code: code,
+        paystack_subaccount_mode: mode,
+        paystack_subaccount_split: split,
+        paystack_subaccount_percentage: percentage,
+        updated_by: actorId,
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      paystack_subaccount_code: code,
+      paystack_subaccount_mode: mode,
+      paystack_subaccount_split: split,
+    };
   }
 
   private mask(code: string): string {
